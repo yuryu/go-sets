@@ -1,6 +1,10 @@
 // Package stringset implements a lightweight set-of-strings type based on Go's
 // built-in map type.  A Set provides some convenience methods for common set
-// operations.
+// operations.  A nil Set is ready for use as an empty set.  The basic set
+// methods (Diff, Intersect, Union, IsSubset) do not mutate their arguments.
+//
+// There are also mutating operations (Add, Discard, Update, Remove) that
+// modify their receiver in-place.
 //
 // Example:
 //    one := stringset.New("one")
@@ -9,6 +13,14 @@
 //    some := nat.Union(one)
 //    fmt.Println(some)
 //     => {"0", "1", "2", "3", "4", "one"}
+//
+//    nat.Remove("2", "4")
+//    fmt.Println(nat)
+//     => {"0", "1", "3"}
+//
+//    one.Add("one", "perfect", "question")
+//    fmt.Println(one)
+//     => {"one", "perfect", "question"}
 //
 package stringset
 
