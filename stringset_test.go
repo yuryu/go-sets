@@ -163,16 +163,20 @@ func TestUpdate(t *testing.T) {
 	tests := []struct {
 		before, update Set
 		want           []string
+		changed        bool
 	}{
-		{nil, nil, nil},
-		{nil, New("a"), []string{"a"}},
-		{New("pdq"), nil, []string{"pdq"}},
-		{New("a", "b"), New("c", "c", "b"), []string{"a", "b", "c"}},
+		{nil, nil, nil, false},
+		{nil, New("a"), []string{"a"}, true},
+		{New("pdq"), nil, []string{"pdq"}, false},
+		{New("a", "b"), New("c", "c", "b"), []string{"a", "b", "c"}, true},
 	}
 	for _, test := range tests {
-		test.before.Update(test.update)
+		ok := test.before.Update(test.update)
 		if got := test.before.Keys(); !reflect.DeepEqual(got, test.want) {
 			t.Errorf("Update %v: got %+q, want %+q", test.before, got, test.want)
+		}
+		if ok != test.changed {
+			t.Errorf("Update %v reported change=%v, want %v", test.before, ok, test.changed)
 		}
 	}
 }
@@ -181,16 +185,20 @@ func TestAdd(t *testing.T) {
 	tests := []struct {
 		before       Set
 		update, want []string
+		changed      bool
 	}{
-		{nil, nil, nil},
-		{nil, []string{"a"}, []string{"a"}},
-		{New("pdq"), nil, []string{"pdq"}},
-		{New("a", "b"), []string{"c", "c", "b"}, []string{"a", "b", "c"}},
+		{nil, nil, nil, false},
+		{nil, []string{"a"}, []string{"a"}, true},
+		{New("pdq"), nil, []string{"pdq"}, false},
+		{New("a", "b"), []string{"c", "c", "b"}, []string{"a", "b", "c"}, true},
 	}
 	for _, test := range tests {
-		test.before.Add(test.update...)
+		ok := test.before.Add(test.update...)
 		if got := test.before.Keys(); !reflect.DeepEqual(got, test.want) {
-			t.Errorf("Update %v: got %+q, want %+q", test.before, got, test.want)
+			t.Errorf("Add %v: got %+q, want %+q", test.before, got, test.want)
+		}
+		if ok != test.changed {
+			t.Errorf("Add %v reported change=%v, want %v", test.before, ok, test.changed)
 		}
 	}
 }
@@ -199,17 +207,21 @@ func TestRemove(t *testing.T) {
 	tests := []struct {
 		before, update Set
 		want           []string
+		changed        bool
 	}{
-		{nil, nil, nil},
-		{nil, New("a"), nil},
-		{New("pdq"), nil, []string{"pdq"}},
-		{New("a", "b"), New("c", "c", "b"), []string{"a"}},
-		{New("a", "b", "c"), New("d", "e"), []string{"a", "b", "c"}},
+		{nil, nil, nil, false},
+		{nil, New("a"), nil, false},
+		{New("pdq"), nil, []string{"pdq"}, false},
+		{New("a", "b"), New("c", "c", "b"), []string{"a"}, true},
+		{New("a", "b", "c"), New("d", "e"), []string{"a", "b", "c"}, false},
 	}
 	for _, test := range tests {
-		test.before.Remove(test.update)
+		ok := test.before.Remove(test.update)
 		if got := test.before.Keys(); !reflect.DeepEqual(got, test.want) {
 			t.Errorf("Remove %v: got %+q, want %+q", test.before, got, test.want)
+		}
+		if ok != test.changed {
+			t.Errorf("Remove %v reported change=%v, want %v", test.before, ok, test.changed)
 		}
 	}
 }
@@ -218,17 +230,21 @@ func TestDiscard(t *testing.T) {
 	tests := []struct {
 		before       Set
 		update, want []string
+		changed      bool
 	}{
-		{nil, nil, nil},
-		{nil, []string{"a"}, nil},
-		{New("pdq"), nil, []string{"pdq"}},
-		{New("a", "b"), []string{"c", "c", "b"}, []string{"a"}},
-		{New("a", "b", "c"), []string{"d", "e"}, []string{"a", "b", "c"}},
+		{nil, nil, nil, false},
+		{nil, []string{"a"}, nil, false},
+		{New("pdq"), nil, []string{"pdq"}, false},
+		{New("a", "b"), []string{"c", "c", "b"}, []string{"a"}, true},
+		{New("a", "b", "c"), []string{"d", "e"}, []string{"a", "b", "c"}, false},
 	}
 	for _, test := range tests {
-		test.before.Discard(test.update...)
+		ok := test.before.Discard(test.update...)
 		if got := test.before.Keys(); !reflect.DeepEqual(got, test.want) {
-			t.Errorf("Remove %v: got %+q, want %+q", test.before, got, test.want)
+			t.Errorf("Discard %v: got %+q, want %+q", test.before, got, test.want)
+		}
+		if ok != test.changed {
+			t.Errorf("Discard %v reported change=%v, want %v", test.before, ok, test.changed)
 		}
 	}
 }

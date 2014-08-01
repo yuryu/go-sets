@@ -160,7 +160,7 @@ func (s1 *Set) Update(s2 Set) bool {
 	for k := range s2 {
 		(*s1)[k] = struct{}{}
 	}
-	return len(*s1) == in
+	return len(*s1) != in
 }
 
 // Add adds the specified strings to *set in-place.  If *set == nil, allocates
@@ -173,7 +173,7 @@ func (set *Set) Add(ss ...string) bool {
 	for _, s := range ss {
 		(*set)[s] = struct{}{}
 	}
-	return len(*set) == in
+	return len(*set) != in
 }
 
 // Remove removes the elements of s2 from s1 in-place.  Reports whether
