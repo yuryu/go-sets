@@ -86,6 +86,38 @@ func TestNotSubset(t *testing.T) {
 	}
 }
 
+func TestEquality(t *testing.T) {
+	nat := New("1", "2", "3", "4", "5")
+	odd := New("1", "3", "5")
+	tests := []struct {
+		left, right Set
+		eq          bool
+	}{
+		{nil, nil, true},
+		{nat, nat, true},           // Equality with the same value
+		{New("a"), New("a"), true}, // Equality with Different values
+		{New("a"), nil, false},
+		{nat, odd, false},
+		{nil, New("a"), false},
+		{New("a"), New("b"), false},
+
+		// Various set operations...
+		{nat.Intersect(odd), odd, true},
+		{odd.Intersect(nat), odd, true},
+		{nat.Intersect(nat), nat, true},
+		{nat.Union(odd), nat, true},
+		{odd.Diff(nat), odd, false},
+		{odd.Diff(nat), nil, true},
+
+		{New("a", "b", "c").Diff(New("b", "m", "x")), New("c").Union(New("a")), true},
+	}
+	for _, test := range tests {
+		if got := test.left.Equals(test.right); got != test.eq {
+			t.Errorf("%v.Equals(%v): got %v, want %v", test.left, test.right, got, test.eq)
+		}
+	}
+}
+
 func TestUnion(t *testing.T) {
 	vowels := New("e", "o", "i", "a", "u")
 	vkeys := []string{"a", "e", "i", "o", "u"}
