@@ -5,6 +5,11 @@
 // Example:
 //    one := stringset.New("one")
 //    none := one.Intersect(nil)
+//    nat := stringset.New("0", "1", "2", "3", "4")
+//    some := nat.Union(one)
+//    fmt.Println(some)
+//     => {"0", "1", "2", "3", "4", "one"}
+//
 package stringset
 
 import (
