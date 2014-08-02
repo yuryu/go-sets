@@ -7,6 +7,9 @@
 // There are also mutating operations (Add, Discard, Update, Remove) that
 // modify their receiver in-place.
 //
+// A Set can also be traversed and modified using the normal map operations.
+// Being a map, a Set is not safe for concurrent access by multiple goroutines.
+//
 // Example:
 //    one := stringset.New("one") // ⇒ {"one"}
 //    none := one.Intersect(nil)  // ⇒ ø
