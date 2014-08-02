@@ -2,6 +2,7 @@ package stringset
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -278,5 +279,83 @@ func TestDiscard(t *testing.T) {
 		if ok != test.changed {
 			t.Errorf("Discard %v reported change=%v, want %v", test.before, ok, test.changed)
 		}
+	}
+}
+
+func TestMap(t *testing.T) {
+	in := New("", "w", "x", "y")
+	out := in.Map(func(s string) string {
+		return "-" + s + "-"
+	})
+	for key := range out {
+		want := strings.Trim(key, "-")
+		if !strings.HasPrefix(key, "-") || !strings.HasPrefix(key, "-") {
+			t.Errorf("Mapped key has the wrong form: %q", key)
+		}
+		if !in.Contains(want) {
+			t.Errorf("Mapped key %q is missing its antecedent %q", key, want)
+		}
+	}
+}
+
+func TestFilter(t *testing.T) {
+	in := New("ant", "bee", "cat", "dog", "aardvark", "apatasaurus", "emu")
+	want := New("bee", "cat", "dog", "emu")
+	if got := in.Filter(func(s string) bool {
+		return !strings.HasPrefix(s, "a")
+	}); !got.Equals(want) {
+		t.Errorf(`%v.Filter("a*"): got %v, want %v`, in, got, want)
+	}
+	if got := New().Filter(func(string) bool { return true }); !got.Empty() {
+		t.Errorf("%v.Filter(true): got %v, want empty", New(), got)
+	}
+	if got := in.Filter(func(string) bool { return false }); !got.Empty() {
+		t.Errorf("%v.Filter(false): got %v, want empty", in, got)
+	}
+}
+
+func TestPartition(t *testing.T) {
+	in := New("a", "be", "cat", "dirt", "ennui", "faiths", "garbage", "horseman")
+	tests := []struct {
+		in, left, right Set
+		f               func(string) bool
+		desc            string
+	}{
+		{New("a", "b"), New("a", "b"), nil,
+			func(string) bool { return true },
+			"all true",
+		},
+		{New("a", "b"), nil, New("a", "b"),
+			func(string) bool { return false },
+			"all false",
+		},
+		{in,
+			New("a", "be", "cat", "dirt", "ennui"),
+			New("faiths", "garbage", "horseman"),
+			func(s string) bool { return len(s) < 6 },
+			"len(s) < 6",
+		},
+		{in,
+			New("a", "cat", "ennui", "garbage"),     // odd
+			New("be", "dirt", "faiths", "horseman"), // even
+			func(s string) bool { return len(s)%2 == 1 },
+			"odd/even",
+		},
+		{New(":x", ":y", "a", "z", ":m", "p"),
+			New(":m", ":x", ":y"),
+			New("a", "p", "z"),
+			func(s string) bool { return strings.HasPrefix(s, ":") },
+			"keywords",
+		},
+	}
+	for _, test := range tests {
+		gotLeft, gotRight := test.in.Partition(test.f)
+		if !gotLeft.Equals(test.left) {
+			t.Errorf("Partition %s left: got %v, want %v", test.desc, gotLeft, test.left)
+		}
+		if !gotRight.Equals(test.right) {
+			t.Errorf("Partition %s right: got %v, want %v", test.desc, gotRight, test.right)
+		}
+		t.Logf("Partition %v %s\n\t left: %v\n\tright: %v", test.in, test.desc, gotLeft, gotRight)
 	}
 }
