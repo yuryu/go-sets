@@ -32,3 +32,15 @@ func (set Set) Partition(f func(string) bool) (yes, no Set) {
 	}
 	return
 }
+
+// Select returns an element of set for which f returns true, if one exists.
+// The second result reports whether such an element was found.  If f == nil,
+// selects an arbitrary element of set.
+func (set Set) Select(f func(string) bool) (string, bool) {
+	for k := range set {
+		if f == nil || f(k) {
+			return k, true
+		}
+	}
+	return "", false
+}

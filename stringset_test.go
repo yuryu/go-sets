@@ -53,6 +53,15 @@ func TestMembership(t *testing.T) {
 			t.Errorf("s.Contains(%q): got %v, want %v", w, got, want)
 		}
 	}
+
+	if got, ok := s.Select(func(s string) bool { return strings.HasPrefix(s, "e") }); !ok {
+		t.Error(`Select("e*"): missing element`)
+	} else {
+		t.Logf(`Found %q for prefix "e"`, got)
+	}
+	if got, ok := s.Select(func(string) bool { return false }); ok {
+		t.Errorf("Select(false): got %q, want nothing", got)
+	}
 }
 
 func TestIsSubset(t *testing.T) {
