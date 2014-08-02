@@ -1,26 +1,26 @@
 // Package stringset implements a lightweight set-of-strings type based on Go's
 // built-in map type.  A Set provides some convenience methods for common set
 // operations.  A nil Set is ready for use as an empty set.  The basic set
-// methods (Diff, Intersect, Union, IsSubset) do not mutate their arguments.
+// methods (Diff, Intersect, Union, IsSubset, Map, Filter, Partition) do not
+// mutate their arguments.
 //
 // There are also mutating operations (Add, Discard, Update, Remove) that
 // modify their receiver in-place.
 //
 // Example:
-//    one := stringset.New("one")
-//    none := one.Intersect(nil)
+//    one := stringset.New("one") // ⇒ {"one"}
+//    none := one.Intersect(nil)  // ⇒ ø
 //    nat := stringset.New("0", "1", "2", "3", "4")
 //    some := nat.Union(one)
-//    fmt.Println(some)
-//     => {"0", "1", "2", "3", "4", "one"}
+//     // ⇒ {"0", "1", "2", "3", "4", "one"}
 //
 //    nat.Remove("2", "4")
 //    fmt.Println(nat)
-//     => {"0", "1", "3"}
+//     // ⇒ {"0", "1", "3"}
 //
 //    one.Add("one", "perfect", "question")
 //    fmt.Println(one)
-//     => {"one", "perfect", "question"}
+//     // ⇒ {"one", "perfect", "question"}
 //
 package stringset
 
@@ -34,7 +34,8 @@ import (
 // representation of an empty set.
 type Set map[string]struct{}
 
-// String implements the fmt.Stringer interface.
+// String implements the fmt.Stringer interface.  It renders the set in standard
+// set notation, e.g., ø for an empty set, {"a", "b", "c"} for a nonempty one.
 func (s Set) String() string {
 	if s.Empty() {
 		return "ø"
