@@ -181,15 +181,15 @@ func (s1 *Set) Update(s2 Set) bool {
 
 // Add adds the specified strings to *set in-place.  If *set == nil, allocates
 // a new set equivalent to New(ss...).  Reports whether anything was added.
-func (set *Set) Add(ss ...string) bool {
-	in := len(*set)
-	if *set == nil {
-		*set = make(Set)
+func (s *Set) Add(ss ...string) bool {
+	in := len(*s)
+	if *s == nil {
+		*s = make(Set)
 	}
-	for _, s := range ss {
-		(*set)[s] = struct{}{}
+	for _, key := range ss {
+		(*s)[key] = struct{}{}
 	}
-	return len(*set) != in
+	return len(*s) != in
 }
 
 // Remove removes the elements of s2 from s1 in-place.  Reports whether
@@ -210,12 +210,12 @@ func (s1 Set) Remove(s2 Set) bool {
 // anything was removed.
 //
 // Equivalent to set = set.Diff(New(ss...)), but does not allocate a set for ss.
-func (set Set) Discard(ss ...string) bool {
-	in := set.Len()
-	if !set.Empty() {
-		for _, s := range ss {
-			delete(set, s)
+func (s Set) Discard(ss ...string) bool {
+	in := s.Len()
+	if !s.Empty() {
+		for _, key := range ss {
+			delete(s, key)
 		}
 	}
-	return set.Len() != in
+	return s.Len() != in
 }
