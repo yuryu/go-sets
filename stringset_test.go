@@ -64,6 +64,29 @@ func TestMembership(t *testing.T) {
 	}
 }
 
+func TestContainsAny(t *testing.T) {
+	set := New("2", "3", "5", "7", "11", "13")
+	tests := []struct {
+		keys []string
+		want bool
+	}{
+		{nil, false},
+		{[]string{}, false},
+		{[]string{"1", "4"}, false},
+		{[]string{""}, false},
+		{[]string{"7"}, true},
+		{[]string{"8", "3", "1", "9"}, true},
+		{[]string{"q", "r", "13", "s"}, true},
+	}
+	t.Logf("Test set: %v", set)
+	for _, test := range tests {
+		got := set.ContainsAny(test.keys...)
+		if got != test.want {
+			t.Errorf("ContainsAny(%+q): got %v, want %v", test.keys, got, test.want)
+		}
+	}
+}
+
 func TestIsSubset(t *testing.T) {
 	var empty Set
 	key := New("some", "of", "what", "a", "fool", "thinks", "often", "remains")

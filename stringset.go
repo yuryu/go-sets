@@ -82,6 +82,18 @@ func (s Set) Contains(str string) bool {
 	return ok
 }
 
+// ContainsAny reports whether the set contains any of the given strings.
+// Equivalent in meaning to !s.Intersect(stringset.New(strs...)).Empty(), but
+// does not construct an intermediate set.
+func (s Set) ContainsAny(strs ...string) bool {
+	for _, key := range strs {
+		if s.Contains(key) {
+			return true
+		}
+	}
+	return false
+}
+
 // IsSubset reports whether s1 is a subset of s2.
 func (s1 Set) IsSubset(s2 Set) bool {
 	if s1.Empty() {
