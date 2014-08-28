@@ -37,8 +37,8 @@ import (
 // representation of an empty set.
 type Set map[string]struct{}
 
-// String implements the fmt.Stringer interface.  It renders the set in standard
-// set notation, e.g., ø for an empty set, {"a", "b", "c"} for a nonempty one.
+// String implements the fmt.Stringer interface.  It renders s in standard set
+// notation, e.g., ø for an empty set, {"a", "b", "c"} for a nonempty one.
 func (s Set) String() string {
 	if s.Empty() {
 		return "ø"
@@ -63,10 +63,10 @@ func New(ss ...string) Set {
 	return set
 }
 
-// Len returns the number of elements in the set.
+// Len returns the number of elements in s.
 func (s Set) Len() int { return len(s) }
 
-// Keys returns a lexicographically sorted slice of the elements in the set.
+// Keys returns a lexicographically sorted slice of the elements in s.
 func (s Set) Keys() []string {
 	var keys []string
 	for k := range s {
@@ -76,7 +76,7 @@ func (s Set) Keys() []string {
 	return keys
 }
 
-// Contains reports whether the set contains one or more of the given strings.
+// Contains reports whether s contains one or more of the given strings.
 // Equivalent in meaning to
 //   !s.Intersect(stringset.New(strs...)).Empty()
 // but does not construct an intermediate set.
@@ -89,7 +89,7 @@ func (s Set) Contains(strs ...string) bool {
 	return false
 }
 
-// IsSubset reports whether s1 is a subset of s2.
+// IsSubset reports whether s1 is a subset of s2, s1 ⊆ s2.
 func (s1 Set) IsSubset(s2 Set) bool {
 	if s1.Empty() {
 		return true
@@ -107,7 +107,7 @@ func (s1 Set) IsSubset(s2 Set) bool {
 // Equals reports whether s1 is equal to s2, having exactly the same elements.
 func (s1 Set) Equals(s2 Set) bool { return s1.IsSubset(s2) && s2.IsSubset(s1) }
 
-// Empty reports whether the set is empty.
+// Empty reports whether s is empty.
 func (s Set) Empty() bool { return len(s) == 0 }
 
 // Union constructs the union s1 ∪ s2.
@@ -174,8 +174,8 @@ func (s1 *Set) Update(s2 Set) bool {
 	return len(*s1) != in
 }
 
-// Add adds the specified strings to *set in-place.  If *set == nil, allocates
-// a new set equivalent to New(ss...).  Reports whether anything was added.
+// Add adds the specified strings to *s in-place.  If *s == nil, allocates a
+// new set equivalent to New(ss...).  Reports whether anything was added.
 func (s *Set) Add(ss ...string) bool {
 	in := len(*s)
 	if *s == nil {
@@ -201,10 +201,11 @@ func (s1 Set) Remove(s2 Set) bool {
 	return s1.Len() != in
 }
 
-// Discard removes the elements of ss from set in-place.  Reports whether
+// Discard removes the elements of ss from s in-place.  Reports whether
 // anything was removed.
 //
-// Equivalent to set = set.Diff(New(ss...)), but does not allocate a set for ss.
+// Equivalent to s = s.Diff(New(ss...)), but does not allocate an intermediate
+// set for ss.
 func (s Set) Discard(ss ...string) bool {
 	in := s.Len()
 	if !s.Empty() {
