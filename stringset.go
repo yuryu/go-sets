@@ -76,18 +76,13 @@ func (s Set) Keys() []string {
 	return keys
 }
 
-// Contains reports whether the set contains the given string.
-func (s Set) Contains(str string) bool {
-	_, ok := s[str]
-	return ok
-}
-
-// ContainsAny reports whether the set contains any of the given strings.
-// Equivalent in meaning to !s.Intersect(stringset.New(strs...)).Empty(), but
-// does not construct an intermediate set.
-func (s Set) ContainsAny(strs ...string) bool {
+// Contains reports whether the set contains one or more of the given strings.
+// Equivalent in meaning to
+//   !s.Intersect(stringset.New(strs...)).Empty()
+// but does not construct an intermediate set.
+func (s Set) Contains(strs ...string) bool {
 	for _, key := range strs {
-		if s.Contains(key) {
+		if _, ok := s[key]; ok {
 			return true
 		}
 	}

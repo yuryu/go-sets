@@ -64,7 +64,7 @@ func TestMembership(t *testing.T) {
 	}
 }
 
-func TestContainsAny(t *testing.T) {
+func TestContains(t *testing.T) {
 	set := New("2", "3", "5", "7", "11", "13")
 	tests := []struct {
 		keys []string
@@ -80,9 +80,9 @@ func TestContainsAny(t *testing.T) {
 	}
 	t.Logf("Test set: %v", set)
 	for _, test := range tests {
-		got := set.ContainsAny(test.keys...)
+		got := set.Contains(test.keys...)
 		if got != test.want {
-			t.Errorf("ContainsAny(%+q): got %v, want %v", test.keys, got, test.want)
+			t.Errorf("Contains(%+q): got %v, want %v", test.keys, got, test.want)
 		}
 	}
 }
