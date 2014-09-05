@@ -1,4 +1,4 @@
-// Package stringset implements a lightweight (finite0 set-of-strings type
+// Package stringset implements a lightweight (finite) set-of-strings type
 // based on Go's built-in map type.  A Set provides some convenience methods
 // for common set operations.  A nil Set is ready for use as an empty set.  The
 // basic set methods (Diff, Intersect, Union, IsSubset, Map, Filter, Partition)
