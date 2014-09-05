@@ -1,8 +1,8 @@
-// Package stringset implements a lightweight set-of-strings type based on Go's
-// built-in map type.  A Set provides some convenience methods for common set
-// operations.  A nil Set is ready for use as an empty set.  The basic set
-// methods (Diff, Intersect, Union, IsSubset, Map, Filter, Partition) do not
-// mutate their arguments.
+// Package stringset implements a lightweight (finite0 set-of-strings type
+// based on Go's built-in map type.  A Set provides some convenience methods
+// for common set operations.  A nil Set is ready for use as an empty set.  The
+// basic set methods (Diff, Intersect, Union, IsSubset, Map, Filter, Partition)
+// do not mutate their arguments.
 //
 // There are also mutating operations (Add, Discard, Update, Remove) that
 // modify their receiver in-place.
@@ -77,7 +77,7 @@ func (s Set) Keys() []string {
 }
 
 // Contains reports whether s contains one or more of the given strings.
-// Equivalent in meaning to
+// It is equivalent in meaning to
 //   !s.Intersect(stringset.New(strs...)).Empty()
 // but does not construct an intermediate set.
 func (s Set) Contains(strs ...string) bool {
@@ -162,7 +162,7 @@ func (s1 Set) Diff(s2 Set) Set {
 }
 
 // Update adds the elements of s2 to *s1 in-place. If *s1 == nil a new set is
-// allocated that is a copy of s2.  Reports whether anything was added.
+// allocated that is a copy of s2 and reports whether anything was added.
 func (s1 *Set) Update(s2 Set) bool {
 	in := len(*s1)
 	if *s1 == nil {
@@ -174,8 +174,8 @@ func (s1 *Set) Update(s2 Set) bool {
 	return len(*s1) != in
 }
 
-// Add adds the specified strings to *s in-place.  If *s == nil, allocates a
-// new set equivalent to New(ss...).  Reports whether anything was added.
+// Add adds the specified strings to *s in-place and reports whether anything
+// was added.  If *s == nil, a new set equivalent to New(ss...) is stored in *s.
 func (s *Set) Add(ss ...string) bool {
 	in := len(*s)
 	if *s == nil {
@@ -187,7 +187,7 @@ func (s *Set) Add(ss ...string) bool {
 	return len(*s) != in
 }
 
-// Remove removes the elements of s2 from s1 in-place.  Reports whether
+// Remove removes the elements of s2 from s1 in-place and reports whether
 // anything was removed.
 //
 // Equivalent to s1 = s1.Diff(s2), but does not allocate a new set.
@@ -201,7 +201,7 @@ func (s1 Set) Remove(s2 Set) bool {
 	return s1.Len() != in
 }
 
-// Discard removes the elements of ss from s in-place.  Reports whether
+// Discard removes the elements of ss from s in-place and reports whether
 // anything was removed.
 //
 // Equivalent to s = s.Diff(New(ss...)), but does not allocate an intermediate
