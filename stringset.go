@@ -123,6 +123,21 @@ func (s1 Set) Equals(s2 Set) bool { return s1.IsSubset(s2) && s2.IsSubset(s1) }
 // Empty reports whether s is empty.
 func (s Set) Empty() bool { return len(s) == 0 }
 
+// Intersects reports whether the intersection s1 ∩ s2 is non-empty, without
+// explicitly constructing the intersection.
+func (s1 Set) Intersects(s2 Set) bool {
+	a, b := s1, s2
+	if len(b) < len(a) {
+		a, b = b, a // Iterate over the smaller set
+	}
+	for k := range a {
+		if _, ok := b[k]; ok {
+			return true
+		}
+	}
+	return false
+}
+
 // Union constructs the union s1 ∪ s2.
 func (s1 Set) Union(s2 Set) Set {
 	if s1.Empty() {

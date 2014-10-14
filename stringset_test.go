@@ -238,6 +238,8 @@ func TestIntersect(t *testing.T) {
 		got := test.left.Intersect(test.right).Keys()
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("%v ∩ %v: got %+q, want %+q", test.left, test.right, got, test.want)
+		} else if want, ok := len(test.want) != 0, test.left.Intersects(test.right); ok != want {
+			t.Errorf("%v.Intersects(%v): got %v, want %v", test.left, test.right, ok, want)
 		}
 	}
 }
