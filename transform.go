@@ -46,8 +46,8 @@ func (s Set) Select(f func(string) bool) (string, bool) {
 }
 
 // Pop removes and returns an element of s for which f returns true, if one
-// exists.  The second result reports whether such an element was found.
-// If f == nil, selects an arbitrary element of s.
+// exists (essentially Select + Discard).  The second result reports whether
+// such an element was found.  If f == nil, pops an arbitrary element of s.
 func (s Set) Pop(f func(string) bool) (string, bool) {
 	if v, ok := s.Select(f); ok {
 		delete(s, v)

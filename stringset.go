@@ -162,8 +162,8 @@ func (s1 Set) Diff(s2 Set) Set {
 	return set
 }
 
-// Update adds the elements of s2 to *s1 in-place. If *s1 == nil a new set is
-// allocated that is a copy of s2 and reports whether anything was added.
+// Update adds the elements of s2 to *s1 in-place, and reports whether anything was added.
+// If *s1 == nil a new set is allocated that is a copy of s2.
 func (s1 *Set) Update(s2 Set) bool {
 	in := len(*s1)
 	if *s1 == nil {
