@@ -110,6 +110,28 @@ func TestContains(t *testing.T) {
 	}
 }
 
+func TestContainsAll(t *testing.T) {
+	set := New("a", "e", "i", "y")
+	tests := []struct {
+		keys []string
+		want bool
+	}{
+		{nil, true},
+		{[]string{}, true},
+		{[]string{"a", "e", "i"}, true},
+		{[]string{"a", "e", "i", "o"}, false},
+		{[]string{"b"}, false},
+		{[]string{"a", "a", "a"}, true},
+	}
+	t.Logf("Test set: %v", set)
+	for _, test := range tests {
+		got := set.ContainsAll(test.keys...)
+		if got != test.want {
+			t.Errorf("ContainsAll(%+q): got %v, want %v", test.keys, got, test.want)
+		}
+	}
+}
+
 func TestIsSubset(t *testing.T) {
 	var empty Set
 	key := New("some", "of", "what", "a", "fool", "thinks", "often", "remains")

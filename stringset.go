@@ -79,7 +79,7 @@ func (s Set) Keys() []string {
 
 // Contains reports whether s contains one or more of the given strings.
 // It is equivalent in meaning to
-//   !s.Intersect(stringset.New(strs...)).Empty()
+//   s.Intersects(stringset.New(strs...))
 // but does not construct an intermediate set.
 func (s Set) Contains(strs ...string) bool {
 	for _, key := range strs {
@@ -88,6 +88,18 @@ func (s Set) Contains(strs ...string) bool {
 		}
 	}
 	return false
+}
+
+// ContainsAll reports whether s contains all the given strings.
+// It is equivalent in meaning to New(strs...).IsSubset(s), but does not
+// construct an intermediate set.  This is always true if len(strs) == 0.
+func (s Set) ContainsAll(strs ...string) bool {
+	for _, str := range strs {
+		if _, ok := s[str]; !ok {
+			return false
+		}
+	}
+	return true
 }
 
 // IsSubset reports whether s1 is a subset of s2, s1 ⊆ s2.
