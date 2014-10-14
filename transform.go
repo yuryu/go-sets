@@ -34,13 +34,24 @@ func (s Set) Partition(f func(string) bool) (yes, no Set) {
 }
 
 // Select returns an element of s for which f returns true, if one exists.  The
-// second result reports whether such an element was found.  If f == nil,
-// selects an arbitrary element of s.
+// second result reports whether such an element was found.
+// If f == nil, selects an arbitrary element of s.
 func (s Set) Select(f func(string) bool) (string, bool) {
 	for k := range s {
 		if f == nil || f(k) {
 			return k, true
 		}
+	}
+	return "", false
+}
+
+// Pop removes and returns an element of s for which f returns true, if one
+// exists.  The second result reports whether such an element was found.
+// If f == nil, selects an arbitrary element of s.
+func (s Set) Pop(f func(string) bool) (string, bool) {
+	if v, ok := s.Select(f); ok {
+		delete(s, v)
+		return v, true
 	}
 	return "", false
 }

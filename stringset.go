@@ -4,7 +4,7 @@
 // basic set methods (Diff, Intersect, Union, IsSubset, Map, Filter, Partition)
 // do not mutate their arguments.
 //
-// There are also mutating operations (Add, Discard, Update, Remove) that
+// There are also mutating operations (Add, Discard, Pop, Remove, Update) that
 // modify their receiver in-place.
 //
 // A Set can also be traversed and modified using the normal map operations.
@@ -205,7 +205,7 @@ func (s1 Set) Remove(s2 Set) bool {
 // Discard removes the elements of ss from s in-place and reports whether
 // anything was removed.
 //
-// Equivalent to s = s.Diff(New(ss...)), but does not allocate an intermediate
+// Equivalent to s.Remove(New(ss...)), but does not allocate an intermediate
 // set for ss.
 func (s Set) Discard(ss ...string) bool {
 	in := s.Len()

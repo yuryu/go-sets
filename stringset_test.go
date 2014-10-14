@@ -54,13 +54,36 @@ func TestMembership(t *testing.T) {
 		}
 	}
 
+	// Test non-mutating selection.
 	if got, ok := s.Select(func(s string) bool { return strings.HasPrefix(s, "e") }); !ok {
 		t.Error(`Select("e*"): missing element`)
 	} else {
 		t.Logf(`Found %q for prefix "e"`, got)
 	}
 	if got, ok := s.Select(func(string) bool { return false }); ok {
-		t.Errorf("Select(false): got %q, want nothing", got)
+		t.Errorf(`Select(impossible): got %q, want ""`, got)
+	}
+	if got, ok := New().Select(nil); ok {
+		t.Errorf(`Select(nil): got %q, want ""`, got)
+	}
+
+	// Test mutating selection.
+	if got, ok := s.Pop(func(s string) bool { return strings.HasPrefix(s, "c") }); !ok {
+		t.Error(`Pop("c*"): missing element`)
+	} else {
+		t.Logf(`Found %q for prefix "c"`, got)
+	}
+	// A popped item is removed from the set.
+	if len(s) != count-1 {
+		t.Errorf("Length after pop: got %d, want %d", len(s), count-1)
+	}
+	// Pop of a nonexistent key returns not-found.
+	if got, ok := s.Pop(func(string) bool { return false }); ok {
+		t.Errorf(`Pop(impossible): got %q, want ""`, got)
+	}
+	// Pop from an empty set returns not-found.
+	if got, ok := New().Pop(nil); ok {
+		t.Errorf(`Pop(nil) on ø: got %q, want ""`, got)
 	}
 }
 
