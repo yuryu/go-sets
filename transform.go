@@ -36,6 +36,12 @@ func (s Set) Partition(f func(string) bool) (yes, no Set) {
 // Choose returns an element of s for which f returns true, if one exists.  The
 // second result reports whether such an element was found.
 // If f == nil, chooses an arbitrary element of s.
+//
+// Example:
+//   re := regexp.MustCompile(`[a-z]\d+`)
+//   s := stringset.New("a", "b15", "c9", "q").Choose(re.MatchString)
+//   fmt.Println(s.Keys()) ⇒ ["b15", "c9"]
+//
 func (s Set) Choose(f func(string) bool) (string, bool) {
 	for k := range s {
 		if f == nil || f(k) {

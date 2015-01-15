@@ -2,6 +2,7 @@ package stringset
 
 import (
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -54,10 +55,11 @@ func TestMembership(t *testing.T) {
 	}
 
 	// Test non-mutating selection.
-	if got, ok := s.Choose(func(s string) bool { return strings.HasPrefix(s, "e") }); !ok {
-		t.Error(`Choose("e*"): missing element`)
+	re := regexp.MustCompile("^e")
+	if got, ok := s.Choose(re.MatchString); !ok {
+		t.Error(`Choose(%q): missing element`, re)
 	} else {
-		t.Logf(`Found %q for prefix "e"`, got)
+		t.Logf(`Found %q for regexp %q`, got, re)
 	}
 	if got, ok := s.Choose(func(string) bool { return false }); ok {
 		t.Errorf(`Choose(impossible): got %q, want ""`, got)
