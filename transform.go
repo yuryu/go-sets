@@ -9,8 +9,8 @@ func (s Set) Map(f func(string) string) Set {
 	return out
 }
 
-// Filter returns the subset of s for which f returns true.
-func (s Set) Filter(f func(string) bool) Set {
+// Select returns the subset of s for which f returns true.
+func (s Set) Select(f func(string) bool) Set {
 	var out Set
 	for k := range s {
 		if f(k) {
@@ -33,10 +33,10 @@ func (s Set) Partition(f func(string) bool) (yes, no Set) {
 	return
 }
 
-// Select returns an element of s for which f returns true, if one exists.  The
+// Choose returns an element of s for which f returns true, if one exists.  The
 // second result reports whether such an element was found.
-// If f == nil, selects an arbitrary element of s.
-func (s Set) Select(f func(string) bool) (string, bool) {
+// If f == nil, chooses an arbitrary element of s.
+func (s Set) Choose(f func(string) bool) (string, bool) {
 	for k := range s {
 		if f == nil || f(k) {
 			return k, true
@@ -46,10 +46,10 @@ func (s Set) Select(f func(string) bool) (string, bool) {
 }
 
 // Pop removes and returns an element of s for which f returns true, if one
-// exists (essentially Select + Discard).  The second result reports whether
+// exists (essentially Choose + Discard).  The second result reports whether
 // such an element was found.  If f == nil, pops an arbitrary element of s.
 func (s Set) Pop(f func(string) bool) (string, bool) {
-	if v, ok := s.Select(f); ok {
+	if v, ok := s.Choose(f); ok {
 		delete(s, v)
 		return v, true
 	}

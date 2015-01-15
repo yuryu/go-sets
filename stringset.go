@@ -1,7 +1,7 @@
 // Package stringset implements a lightweight (finite) set-of-strings type
 // based on Go's built-in map type.  A Set provides some convenience methods
 // for common set operations.  A nil Set is ready for use as an empty set.  The
-// basic set methods (Diff, Intersect, Union, IsSubset, Map, Filter, Partition)
+// basic set methods (Diff, Intersect, Union, IsSubset, Map, Choose, Partition)
 // do not mutate their arguments.
 //
 // There are also mutating operations (Add, Discard, Pop, Remove, Update) that
@@ -77,11 +77,11 @@ func (s Set) Keys() []string {
 	return keys
 }
 
-// Contains reports whether s contains one or more of the given strings.
+// ContainsAny reports whether s contains one or more of the given strings.
 // It is equivalent in meaning to
 //   s.Intersects(stringset.New(strs...))
 // but does not construct an intermediate set.
-func (s Set) Contains(strs ...string) bool {
+func (s Set) ContainsAny(strs ...string) bool {
 	for _, key := range strs {
 		if _, ok := s[key]; ok {
 			return true
@@ -91,8 +91,9 @@ func (s Set) Contains(strs ...string) bool {
 }
 
 // ContainsAll reports whether s contains all the given strings.
-// It is equivalent in meaning to New(strs...).IsSubset(s), but does not
-// construct an intermediate set.  This is always true if len(strs) == 0.
+// It is equivalent in meaning to
+//   New(strs...).IsSubset(s)
+// but does not construct an intermediate set.
 func (s Set) ContainsAll(strs ...string) bool {
 	for _, str := range strs {
 		if _, ok := s[str]; !ok {

@@ -20,8 +20,7 @@ func TestEmptiness(t *testing.T) {
 		t.Errorf("New() returned non-nil: %v", s)
 	}
 
-	s = New("something")
-	if s.Empty() {
+	if s := New("something"); s.Empty() {
 		t.Errorf("Nonempty Set is reported empty: %v", s)
 	}
 }
@@ -49,22 +48,22 @@ func TestMembership(t *testing.T) {
 	}
 	s := New(words[:count]...)
 	for i, w := range words {
-		if got, want := s.Contains(w), i < count; got != want {
-			t.Errorf("s.Contains(%q): got %v, want %v", w, got, want)
+		if got, want := s.ContainsAny(w), i < count; got != want {
+			t.Errorf("s.ContainsAny(%q): got %v, want %v", w, got, want)
 		}
 	}
 
 	// Test non-mutating selection.
-	if got, ok := s.Select(func(s string) bool { return strings.HasPrefix(s, "e") }); !ok {
-		t.Error(`Select("e*"): missing element`)
+	if got, ok := s.Choose(func(s string) bool { return strings.HasPrefix(s, "e") }); !ok {
+		t.Error(`Choose("e*"): missing element`)
 	} else {
 		t.Logf(`Found %q for prefix "e"`, got)
 	}
-	if got, ok := s.Select(func(string) bool { return false }); ok {
-		t.Errorf(`Select(impossible): got %q, want ""`, got)
+	if got, ok := s.Choose(func(string) bool { return false }); ok {
+		t.Errorf(`Choose(impossible): got %q, want ""`, got)
 	}
-	if got, ok := New().Select(nil); ok {
-		t.Errorf(`Select(nil): got %q, want ""`, got)
+	if got, ok := New().Choose(nil); ok {
+		t.Errorf(`Choose(nil): got %q, want ""`, got)
 	}
 
 	// Test mutating selection.
@@ -87,7 +86,7 @@ func TestMembership(t *testing.T) {
 	}
 }
 
-func TestContains(t *testing.T) {
+func TestContainsAny(t *testing.T) {
 	set := New("2", "3", "5", "7", "11", "13")
 	tests := []struct {
 		keys []string
@@ -103,9 +102,9 @@ func TestContains(t *testing.T) {
 	}
 	t.Logf("Test set: %v", set)
 	for _, test := range tests {
-		got := set.Contains(test.keys...)
+		got := set.ContainsAny(test.keys...)
 		if got != test.want {
-			t.Errorf("Contains(%+q): got %v, want %v", test.keys, got, test.want)
+			t.Errorf("ContainsAny(%+q): got %v, want %v", test.keys, got, test.want)
 		}
 	}
 }
@@ -371,25 +370,25 @@ func TestMap(t *testing.T) {
 		if !strings.HasPrefix(key, "-") || !strings.HasPrefix(key, "-") {
 			t.Errorf("Mapped key has the wrong form: %q", key)
 		}
-		if !in.Contains(want) {
+		if !in.ContainsAny(want) {
 			t.Errorf("Mapped key %q is missing its antecedent %q", key, want)
 		}
 	}
 }
 
-func TestFilter(t *testing.T) {
+func TestSelection(t *testing.T) {
 	in := New("ant", "bee", "cat", "dog", "aardvark", "apatasaurus", "emu")
 	want := New("bee", "cat", "dog", "emu")
-	if got := in.Filter(func(s string) bool {
+	if got := in.Select(func(s string) bool {
 		return !strings.HasPrefix(s, "a")
 	}); !got.Equals(want) {
-		t.Errorf(`%v.Filter("a*"): got %v, want %v`, in, got, want)
+		t.Errorf(`%v.Select("a*"): got %v, want %v`, in, got, want)
 	}
-	if got := New().Filter(func(string) bool { return true }); !got.Empty() {
-		t.Errorf("%v.Filter(true): got %v, want empty", New(), got)
+	if got := New().Select(func(string) bool { return true }); !got.Empty() {
+		t.Errorf("%v.Select(true): got %v, want empty", New(), got)
 	}
-	if got := in.Filter(func(string) bool { return false }); !got.Empty() {
-		t.Errorf("%v.Filter(false): got %v, want empty", in, got)
+	if got := in.Select(func(string) bool { return false }); !got.Empty() {
+		t.Errorf("%v.Select(false): got %v, want empty", in, got)
 	}
 }
 
