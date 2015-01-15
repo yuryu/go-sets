@@ -3,6 +3,7 @@ package stringset
 import (
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 	"testing"
 )
@@ -459,6 +460,48 @@ func TestIndex(t *testing.T) {
 		got := Index(test.needle, test.keys...)
 		if got != test.want {
 			t.Errorf("Index(%q, %q): got %d, want %d", test.needle, test.keys, got, test.want)
+		}
+	}
+}
+
+type keyer []string
+
+func (k keyer) Keys() []string {
+	p := make([]string, len(k))
+	copy(p, k)
+	sort.Strings(p)
+	return p
+}
+
+func TestKeys(t *testing.T) {
+	tests := []struct {
+		input interface{}
+		want  []string
+	}{
+		// A single string, which is its own (single) key.
+		{"foo", []string{"foo"}},
+
+		// A slice of strings maps to itself.
+		{[]string{"pear", "banana", "tart"}, []string{"pear", "banana", "tart"}},
+
+		// The Set type, which implements Keyer.
+		{Set(nil), nil},
+		{New("s", "p", "q", "r"), []string{"p", "q", "r", "s"}},
+
+		// A non-Set Keyer.
+		{keyer{"z", "x", "a", "y", "z"}, []string{"a", "x", "y", "z", "z"}},
+
+		// Various map types with string keys.
+		{map[string]string(nil), nil},
+		{map[string]int{"ten": 10, "nine": 9, "eight": 8}, []string{"eight", "nine", "ten"}},
+		{map[string]string{"4": "four", "1": "one", "5": "five", "9": "nine"}, []string{"1", "4", "5", "9"}},
+	}
+	for _, test := range tests {
+		got := Keys(test.input)
+		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("Keys(%v :: %T): got %+q, want %+q", test.input, test.input, got, test.want)
+		} else {
+			t.Logf("Keys(%v :: %T) OK %+q", test.input, test.input, got)
 		}
 	}
 }

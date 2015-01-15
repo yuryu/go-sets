@@ -29,6 +29,7 @@
 package stringset
 
 import (
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -253,4 +254,32 @@ func Index(needle string, ss ...string) int {
 		}
 	}
 	return -1
+}
+
+// A Keyer implements a Keys method that returns the keys of a collection such
+// as a map or a Set.
+type Keyer interface {
+	// Keys returns the keys of the receiver, which may be nil.
+	Keys() []string
+}
+
+// Keys returns a slice of string keys from v, which must either be a Keyer or
+// have type string, []string or map[string]T. It will panic if the type of v
+// does not have one of these forms. If v is a map value, its keys will be
+// returned in lexicographic order as defined by sort.Strings.
+func Keys(v interface{}) []string {
+	switch t := v.(type) {
+	case Keyer:
+		return t.Keys()
+	case []string:
+		return t
+	case string:
+		return []string{t}
+	}
+	var keys []string
+	for _, key := range reflect.ValueOf(v).MapKeys() {
+		keys = append(keys, key.Interface().(string))
+	}
+	sort.Strings(keys)
+	return keys
 }
