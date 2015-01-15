@@ -244,3 +244,13 @@ func (s Set) Discard(ss ...string) bool {
 	}
 	return s.Len() != in
 }
+
+// Index returns the first offset of needle in ss, if it occurs; otherwise -1.
+func Index(needle string, ss ...string) int {
+	for i, s := range ss {
+		if s == needle {
+			return i
+		}
+	}
+	return -1
+}

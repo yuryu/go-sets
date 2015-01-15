@@ -437,3 +437,26 @@ func TestPartition(t *testing.T) {
 		t.Logf("Partition %v %s\n\t left: %v\n\tright: %v", test.in, test.desc, gotLeft, gotRight)
 	}
 }
+
+func TestIndex(t *testing.T) {
+	tests := []struct {
+		needle string
+		keys   []string
+		want   int
+	}{
+		{"", nil, -1},
+		{"a", nil, -1},
+		{"c", []string{"a", "b"}, -1},
+		{"a", []string{"a", "b"}, 0},
+		{"b", []string{"a", "b"}, 1},
+		{"c", []string{"a", "c", "b", "c"}, 1},
+		{"q", []string{"a", "c", "b", "q", ""}, 3},
+		{"", []string{"a", "c", "", "q", ""}, 2},
+	}
+	for _, test := range tests {
+		got := Index(test.needle, test.keys...)
+		if got != test.want {
+			t.Errorf("Index(%q, %q): got %d, want %d", test.needle, test.keys, got, test.want)
+		}
+	}
+}
