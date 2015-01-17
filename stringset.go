@@ -191,6 +191,12 @@ func (s1 Set) Diff(s2 Set) Set {
 	return set
 }
 
+// SymDiff constructs the symmetric difference s1 ∆ s2.
+// It is equivalent in meaning to (s1 ∪ s2) \ (s1 ∩ s2).
+func (s1 Set) SymDiff(s2 Set) Set {
+	return s1.Union(s2).Diff(s1.Intersect(s2))
+}
+
 // Update adds the elements of s2 to *s1 in-place, and reports whether anything was added.
 // If *s1 == nil a new set is allocated that is a copy of s2.
 func (s1 *Set) Update(s2 Set) bool {

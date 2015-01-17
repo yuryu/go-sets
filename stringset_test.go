@@ -273,6 +273,33 @@ func TestDiff(t *testing.T) {
 	}
 }
 
+func TestSymDiff(t *testing.T) {
+	a := New("a", "b", "c", "d", "e")
+	b := New("a", "e", "i", "o", "u")
+	c := New("d", "e", "f", "i")
+	empty := New()
+
+	tests := []struct {
+		left, right Set
+		want        []string
+	}{
+		{empty, a, a.Keys()},
+		{b, empty, b.Keys()},
+		{a, a, nil},
+		{a, b, []string{"b", "c", "d", "i", "o", "u"}},
+		{b, a, []string{"b", "c", "d", "i", "o", "u"}},
+		{a, c, []string{"a", "b", "c", "f", "i"}},
+		{c, a, []string{"a", "b", "c", "f", "i"}},
+		{c, b, []string{"a", "d", "f", "o", "u"}},
+	}
+	for _, test := range tests {
+		got := test.left.SymDiff(test.right).Keys()
+		if !reflect.DeepEqual(got, test.want) {
+			t.Errorf("%v ∆ %v: got %+q, want %+q", test.left, test.right, got, test.want)
+		}
+	}
+}
+
 func TestUpdate(t *testing.T) {
 	tests := []struct {
 		before, update Set
