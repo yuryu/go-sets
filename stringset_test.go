@@ -27,6 +27,27 @@ func TestEmptiness(t *testing.T) {
 	}
 }
 
+func TestClone(t *testing.T) {
+	a := New(strings.Fields("an apple in a basket is worth two in the weasels")...)
+	b := New("a", "an", "the")
+	c := a.Clone()
+	c.Remove(b)
+	if c.Equals(a) {
+		t.Errorf("Unexpected equality: %v == %v", a, c)
+	} else {
+		t.Logf("%v.Clone().Remove(%v) == %v", a, b, c)
+	}
+	c.Update(b)
+	if !c.Equals(a) {
+		t.Errorf("Unexpected inequality: %v != %v", a, c)
+	}
+
+	var s Set
+	if got := s.Clone(); got != nil {
+		t.Errorf("Clone of nil set: got %v, want nil", got)
+	}
+}
+
 func TestUniqueness(t *testing.T) {
 	// Sets should not contain duplicates.  Obviously this is impossible with
 	// the map implementation, but other representations are viable.
@@ -283,6 +304,7 @@ func TestSymDiff(t *testing.T) {
 		left, right Set
 		want        []string
 	}{
+		{empty, empty, nil},
 		{empty, a, a.Keys()},
 		{b, empty, b.Keys()},
 		{a, a, nil},

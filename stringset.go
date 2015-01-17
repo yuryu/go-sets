@@ -78,6 +78,13 @@ func (s Set) Keys() []string {
 	return keys
 }
 
+// Clone returns a new Set distinct from s, containing the same keys.
+func (s Set) Clone() Set {
+	var c Set
+	c.Update(s)
+	return c
+}
+
 // ContainsAny reports whether s contains one or more of the given strings.
 // It is equivalent in meaning to
 //   s.Intersects(stringset.New(strs...))
@@ -197,11 +204,12 @@ func (s1 Set) SymDiff(s2 Set) Set {
 	return s1.Union(s2).Diff(s1.Intersect(s2))
 }
 
-// Update adds the elements of s2 to *s1 in-place, and reports whether anything was added.
-// If *s1 == nil a new set is allocated that is a copy of s2.
+// Update adds the elements of s2 to *s1 in-place, and reports whether anything
+// was added.
+// If *s1 == nil and s2 ≠ ø, a new set is allocated that is a copy of s2.
 func (s1 *Set) Update(s2 Set) bool {
 	in := len(*s1)
-	if *s1 == nil {
+	if *s1 == nil && len(s2) > 0 {
 		*s1 = make(Set)
 	}
 	for k := range s2 {
