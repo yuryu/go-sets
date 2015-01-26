@@ -148,9 +148,9 @@ func TestContainsAll(t *testing.T) {
 	}
 	t.Logf("Test set: %v", set)
 	for _, test := range tests {
-		got := set.ContainsAll(test.keys...)
+		got := set.Contains(test.keys...)
 		if got != test.want {
-			t.Errorf("ContainsAll(%+q): got %v, want %v", test.keys, got, test.want)
+			t.Errorf("Contains(%+q): got %v, want %v", test.keys, got, test.want)
 		}
 	}
 }

@@ -98,11 +98,11 @@ func (s Set) ContainsAny(strs ...string) bool {
 	return false
 }
 
-// ContainsAll reports whether s contains all the given strings.
+// Contains reports whether s contains (all) the given strings.
 // It is equivalent in meaning to
 //   New(strs...).IsSubset(s)
 // but does not construct an intermediate set.
-func (s Set) ContainsAll(strs ...string) bool {
+func (s Set) Contains(strs ...string) bool {
 	for _, str := range strs {
 		if _, ok := s[str]; !ok {
 			return false
