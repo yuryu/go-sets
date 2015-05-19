@@ -278,9 +278,9 @@ type Keyer interface {
 }
 
 // Keys returns a slice of string keys from v, which must either be a Keyer or
-// have type string, []string or map[string]T. It will panic if the type of v
-// does not have one of these forms. If v is a map value, its keys will be
-// returned in lexicographic order as defined by sort.Strings.
+// have type string, []string or map[string]T. It returns nil if v's type does
+// not have one of these forms. If v is a map value, its keys will be returned
+// in lexicographic order as defined by sort.Strings.
 func Keys(v interface{}) []string {
 	switch t := v.(type) {
 	case Keyer:
@@ -289,11 +289,31 @@ func Keys(v interface{}) []string {
 		return t
 	case string:
 		return []string{t}
+	case nil:
+		return nil
+	}
+	m := reflect.ValueOf(v)
+	if m.Kind() != reflect.Map || m.Type().Key().Kind() != reflect.String {
+		return nil
 	}
 	var keys []string
-	for _, key := range reflect.ValueOf(v).MapKeys() {
+	for _, key := range m.MapKeys() {
 		keys = append(keys, key.Interface().(string))
 	}
 	sort.Strings(keys)
 	return keys
+}
+
+// Values returns a Set of the values from v, which has type map[T]string.
+// Returns the empty set if v does not have a type of this form.
+func Values(v interface{}) Set {
+	if t := reflect.TypeOf(v); t == nil || t.Kind() != reflect.Map || t.Elem().Kind() != reflect.String {
+		return nil
+	}
+	var set Set
+	m := reflect.ValueOf(v)
+	for _, key := range m.MapKeys() {
+		set.Add(m.MapIndex(key).Interface().(string))
+	}
+	return set
 }
