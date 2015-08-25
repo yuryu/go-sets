@@ -10,6 +10,11 @@ func (s Set) Map(f func(string) string) Set {
 }
 
 // Select returns the subset of s for which f returns true.
+//
+// Example:
+//   re := regexp.MustCompile(`[a-z]\d+`)
+//   s := stringset.New("a", "b15", "c9", "q").Select(re.MatchString)
+//   fmt.Println(s.Keys()) // ⇒ [b15 c9]
 func (s Set) Select(f func(string) bool) Set {
 	var out Set
 	for k := range s {
@@ -38,10 +43,9 @@ func (s Set) Partition(f func(string) bool) (yes, no Set) {
 // If f == nil, chooses an arbitrary element of s.
 //
 // Example:
-//   re := regexp.MustCompile(`[a-z]\d+`)
-//   s := stringset.New("a", "b15", "c9", "q").Choose(re.MatchString)
-//   fmt.Println(s.Keys()) ⇒ ["b15", "c9"]
-//
+//   s := stringset.New("a", "ab", "abc", "abcd")
+//   long, ok := s.Choose(func(c string) bool { return len(c) > 3 })
+//   fmt.Println(long, ok) // ⇒ abcd true
 func (s Set) Choose(f func(string) bool) (string, bool) {
 	for k := range s {
 		if f == nil || f(k) {

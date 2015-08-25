@@ -1,6 +1,7 @@
 package stringset
 
 import (
+	"fmt"
 	"reflect"
 	"regexp"
 	"sort"
@@ -574,4 +575,45 @@ func TestMapValues(t *testing.T) {
 			t.Errorf("MapValues %v: got %v, want %v", test.input, got, want)
 		}
 	}
+}
+
+func ExampleIntersect() {
+	one := New("one")
+	fmt.Println(one.Intersect(nil))
+	// Output: ø
+}
+
+func ExampleUnion() {
+	nat := New("0", "1", "2", "3", "4")
+	some := nat.Union(New("one"))
+	fmt.Println(some)
+	// Output: {"0", "1", "2", "3", "4", "one"}
+}
+
+func ExampleDiscard() {
+	nat := New("0", "1", "2", "3", "4")
+	nat.Discard("2", "4", "6")
+	fmt.Println(nat)
+	// Output: {"0", "1", "3"}
+}
+
+func ExampleAdd() {
+	one := New("one")
+	one.Add("one", "perfect", "question")
+	fmt.Println(one)
+	// Output: {"one", "perfect", "question"}
+}
+
+func ExampleSelect() {
+	re := regexp.MustCompile(`[a-z]\d+`)
+	s := New("a", "b15", "c9", "q").Select(re.MatchString)
+	fmt.Println(s.Keys())
+	// Output: [b15 c9]
+}
+
+func ExampleChoose() {
+	s := New("a", "ab", "abc", "abcd")
+	long, ok := s.Choose(func(c string) bool { return len(c) > 3 })
+	fmt.Println(long, ok)
+	// Output: abcd true
 }

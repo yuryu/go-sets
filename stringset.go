@@ -18,7 +18,7 @@
 //    some := nat.Union(one)
 //     // ⇒ {"0", "1", "2", "3", "4", "one"}
 //
-//    nat.Remove("2", "4")
+//    nat.Discard("2", "4")
 //    fmt.Println(nat)
 //     // ⇒ {"0", "1", "3"}
 //
