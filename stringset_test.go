@@ -429,6 +429,24 @@ func TestMap(t *testing.T) {
 	}
 }
 
+func TestForEach(t *testing.T) {
+	in := New("alice", "basil", "clara", "desmond", "ernie")
+	saw := make(map[string]int)
+	in.ForEach(func(name string) {
+		saw[name]++
+	})
+	for want := range in {
+		if saw[want] != 1 {
+			t.Errorf("Saw %q %d times, wanted 1", want, saw[want])
+		}
+	}
+	for got, n := range saw {
+		if _, ok := in[got]; !ok {
+			t.Errorf("Saw %q %d times, wanted 0", got, n)
+		}
+	}
+}
+
 func TestSelection(t *testing.T) {
 	in := New("ant", "bee", "cat", "dog", "aardvark", "apatasaurus", "emu")
 	want := New("bee", "cat", "dog", "emu")

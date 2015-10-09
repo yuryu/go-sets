@@ -9,6 +9,13 @@ func (s Set) Map(f func(string) string) Set {
 	return out
 }
 
+// ForEach applies f to each element of s.
+func (s Set) ForEach(f func(string)) {
+	for k := range s {
+		f(k)
+	}
+}
+
 // Select returns the subset of s for which f returns true.
 //
 // Example:
