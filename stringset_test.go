@@ -688,6 +688,31 @@ func ExampleSet_Each() {
 	// Output: 11
 }
 
+func ExampleSet_Pop() {
+	s := New("a", "bc", "def", "ghij")
+	p, ok := s.Pop(func(s string) bool {
+		return len(s) == 2
+	})
+	fmt.Println(p, ok, s)
+	// Output: bc true {"a", "def", "ghij"}
+}
+
+func ExampleSet_Partition() {
+	s := New("aba", "d", "qpc", "ff")
+	a, b := s.Partition(func(s string) bool {
+		return s[0] == s[len(s)-1]
+	})
+	fmt.Println(a, b)
+	// Output: {"aba", "d", "ff"} {"qpc"}
+}
+
+func ExampleSet_SymDiff() {
+	s := New("a", "b", "c")
+	t := New("a", "c", "t")
+	fmt.Println(s.SymDiff(t))
+	// Output: {"b", "t"}
+}
+
 func ExampleFromKeys() {
 	s := FromKeys(map[string]int{
 		"one":   1,
