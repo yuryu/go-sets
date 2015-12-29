@@ -619,16 +619,13 @@ func TestFromKeys(t *testing.T) {
 }
 
 func ExampleSet_Intersect() {
-	one := New("one")
-	fmt.Println(one.Intersect(nil))
+	fmt.Println(New("one").Intersect(nil))
 	// Output: ø
 }
 
 func ExampleSet_Union() {
-	nat := New("0", "1", "2", "3", "4")
-	some := nat.Union(New("one"))
-	fmt.Println(some)
-	// Output: {"0", "1", "2", "3", "4", "one"}
+	fmt.Println(New("0", "1", "2").Union(New("x")))
+	// Output: {"0", "1", "2", "x"}
 }
 
 func ExampleSet_Discard() {
@@ -659,14 +656,46 @@ func ExampleSet_Choose() {
 	// Output: abcd true
 }
 
+func ExampleSet_Contains() {
+	s := New("a", "b", "c", "d", "e")
+	ae := s.Contains("a", "e")       // all present
+	bdx := s.Contains("b", "d", "x") // x missing
+	fmt.Println(ae, bdx)
+	// Output: true false
+}
+
+func ExampleSet_ContainsAny() {
+	s := New("a", "b", "c")
+	fm := s.ContainsAny("f", "m")       // all missing
+	bdx := s.ContainsAny("b", "d", "x") // b present
+	fmt.Println(fm, bdx)
+	// Output: false true
+}
+
+func ExampleSet_Diff() {
+	a := New("a", "b", "c")
+	v := New("a", "e", "i")
+	fmt.Println(a.Diff(v))
+	// Output: {"b", "c"}
+}
+
+func ExampleSet_ForEach() {
+	sum := 0
+	New("one", "two", "three").ForEach(func(s string) {
+		sum += len(s)
+	})
+	fmt.Println(sum)
+	// Output: 11
+}
+
 func ExampleFromKeys() {
 	s := FromKeys(map[string]int{
 		"one":   1,
 		"two":   2,
 		"three": 3,
 	})
-	fmt.Println(s.Keys())
-	// Output: [one three two]
+	fmt.Println(s)
+	// Output: {"one", "three", "two"}
 }
 
 func ExampleFromValues() {
@@ -677,6 +706,6 @@ func ExampleFromValues() {
 		4: "blue",
 		5: "green",
 	})
-	fmt.Println(s.Keys())
-	// Output: [blue green red]
+	fmt.Println(s)
+	// Output: {"blue", "green", "red"}
 }
