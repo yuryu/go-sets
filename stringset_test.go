@@ -658,3 +658,25 @@ func ExampleChoose() {
 	fmt.Println(long, ok)
 	// Output: abcd true
 }
+
+func ExampleFromKeys() {
+	s := FromKeys(map[string]int{
+		"one":   1,
+		"two":   2,
+		"three": 3,
+	})
+	fmt.Println(s.Keys())
+	// Output: [one three two]
+}
+
+func ExampleFromValues() {
+	s := FromValues(map[int]string{
+		1: "red",
+		2: "green",
+		3: "red",
+		4: "blue",
+		5: "green",
+	})
+	fmt.Println(s.Keys())
+	// Output: [blue green red]
+}
