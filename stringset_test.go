@@ -574,7 +574,7 @@ func TestKeys(t *testing.T) {
 	}
 }
 
-func TestMapValues(t *testing.T) {
+func TestFromValues(t *testing.T) {
 	tests := []struct {
 		input interface{}
 		want  []string
@@ -587,7 +587,7 @@ func TestMapValues(t *testing.T) {
 		{map[*int]string{nil: "blah"}, []string{"blah"}},
 	}
 	for _, test := range tests {
-		got := Values(test.input)
+		got := FromValues(test.input)
 		want := New(test.want...)
 		if !got.Equals(want) {
 			t.Errorf("MapValues %v: got %v, want %v", test.input, got, want)

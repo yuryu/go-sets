@@ -304,9 +304,9 @@ func Keys(v interface{}) []string {
 	return keys
 }
 
-// Values returns a Set of the values from v, which has type map[T]string.
+// FromValues returns a Set of the values from v, which has type map[T]string.
 // Returns the empty set if v does not have a type of this form.
-func Values(v interface{}) Set {
+func FromValues(v interface{}) Set {
 	if t := reflect.TypeOf(v); t == nil || t.Kind() != reflect.Map || t.Elem().Kind() != reflect.String {
 		return nil
 	}
