@@ -277,11 +277,11 @@ type Keyer interface {
 	Keys() []string
 }
 
-// Keys returns a slice of string keys from v, which must either be a Keyer or
-// have type string, []string or map[string]T. It returns nil if v's type does
-// not have one of these forms. If v is a map value, its keys will be returned
-// in lexicographic order as defined by sort.Strings.
-func Keys(v interface{}) []string {
+// keysOf returns a slice of string keys from v, which must either be a Keyer
+// or have type string, []string or map[string]T. It returns nil if v's type
+// does not have one of these forms. If v is a map value, its keys will be
+// returned in lexicographic order as defined by sort.Strings.
+func keysOf(v interface{}) []string {
 	switch t := v.(type) {
 	case Keyer:
 		return t.Keys()
@@ -317,3 +317,8 @@ func FromValues(v interface{}) Set {
 	}
 	return set
 }
+
+// FromKeys returns a Set of the strings from v, which must either be a Keyer
+// or have type string, []string or map[string]T. It returns nil if v's type
+// does not have one of these forms.
+func FromKeys(v interface{}) Set { return New(keysOf(v)...) }

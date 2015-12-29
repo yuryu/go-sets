@@ -541,7 +541,7 @@ func (k keyer) Keys() []string {
 	return p
 }
 
-func TestKeys(t *testing.T) {
+func TestKeysOf(t *testing.T) {
 	tests := []struct {
 		input interface{}
 		want  []string
@@ -565,11 +565,11 @@ func TestKeys(t *testing.T) {
 		{map[string]string{"4": "four", "1": "one", "5": "five", "9": "nine"}, []string{"1", "4", "5", "9"}},
 	}
 	for _, test := range tests {
-		got := Keys(test.input)
+		got := keysOf(test.input)
 		if !reflect.DeepEqual(got, test.want) {
-			t.Errorf("Keys(%v :: %T): got %+q, want %+q", test.input, test.input, got, test.want)
+			t.Errorf("keysOf(%v :: %T): got %+q, want %+q", test.input, test.input, got, test.want)
 		} else {
-			t.Logf("Keys(%v :: %T) OK %+q", test.input, test.input, got)
+			t.Logf("keysOf(%v :: %T) OK %+q", test.input, test.input, got)
 		}
 	}
 }
@@ -591,6 +591,29 @@ func TestFromValues(t *testing.T) {
 		want := New(test.want...)
 		if !got.Equals(want) {
 			t.Errorf("MapValues %v: got %v, want %v", test.input, got, want)
+		}
+	}
+}
+
+func TestFromKeys(t *testing.T) {
+	tests := []struct {
+		input interface{}
+		want  []string
+	}{
+		{3.5, nil},                  // unkeyable type
+		{map[int]int{1: 1}, nil},    // unkeyable type
+		{nil, nil},                  // empty
+		{[]string{}, nil},           // empty
+		{map[string]float64{}, nil}, // empty
+		{"foo", []string{"foo"}},
+		{[]string{"foo", "bar", "foo", "foo"}, []string{"foo", "bar"}},
+		{map[string]int{"one": 1, "two": 2}, []string{"one", "two"}},
+	}
+	for _, test := range tests {
+		got := FromKeys(test.input)
+		want := New(test.want...)
+		if !got.Equals(want) {
+			t.Errorf("MapKeys %v: got %v, want %v", test.input, got, want)
 		}
 	}
 }
