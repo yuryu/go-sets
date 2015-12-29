@@ -59,8 +59,8 @@ func TestUniqueness(t *testing.T) {
 
 	// Keys should come out sorted.
 	wantKeys := []string{"a", "b", "c", "d", "e"}
-	if got := s.Keys(); !reflect.DeepEqual(got, wantKeys) {
-		t.Errorf("s.Keys(): got %+q, want %+q", got, wantKeys)
+	if got := s.Elements(); !reflect.DeepEqual(got, wantKeys) {
+		t.Errorf("s.Elements(): got %+q, want %+q", got, wantKeys)
 	}
 }
 
@@ -226,15 +226,15 @@ func TestUnion(t *testing.T) {
 
 	consonants := New("h", "f", "b", "d", "g", "c")
 
-	if got := vowels.Union(nil).Keys(); !reflect.DeepEqual(got, vkeys) {
+	if got := vowels.Union(nil).Elements(); !reflect.DeepEqual(got, vkeys) {
 		t.Errorf("Vowels ∪ ø: got %+q, want %+q", got, vkeys)
 	}
-	if got := New().Union(vowels).Keys(); !reflect.DeepEqual(got, vkeys) {
+	if got := New().Union(vowels).Elements(); !reflect.DeepEqual(got, vkeys) {
 		t.Errorf("ø ∪ Vowels: got %+q, want %+q", got, vkeys)
 	}
 
 	want := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "o", "u"}
-	if got := vowels.Union(consonants).Keys(); !reflect.DeepEqual(got, want) {
+	if got := vowels.Union(consonants).Elements(); !reflect.DeepEqual(got, want) {
 		t.Errorf("Vowels ∪ Consonants: got %+q, want %+q", got, want)
 	}
 }
@@ -259,7 +259,7 @@ func TestIntersect(t *testing.T) {
 		{prime, nat, []string{"2", "3", "5", "7"}},
 	}
 	for _, test := range tests {
-		got := test.left.Intersect(test.right).Keys()
+		got := test.left.Intersect(test.right).Elements()
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("%v ∩ %v: got %+q, want %+q", test.left, test.right, got, test.want)
 		} else if want, ok := len(test.want) != 0, test.left.Intersects(test.right); ok != want {
@@ -288,7 +288,7 @@ func TestDiff(t *testing.T) {
 		{prime, nat, []string{"!", "d", "m", "x"}},
 	}
 	for _, test := range tests {
-		got := test.left.Diff(test.right).Keys()
+		got := test.left.Diff(test.right).Elements()
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("%v \\ %v: got %+q, want %+q", test.left, test.right, got, test.want)
 		}
@@ -306,8 +306,8 @@ func TestSymDiff(t *testing.T) {
 		want        []string
 	}{
 		{empty, empty, nil},
-		{empty, a, a.Keys()},
-		{b, empty, b.Keys()},
+		{empty, a, a.Elements()},
+		{b, empty, b.Elements()},
 		{a, a, nil},
 		{a, b, []string{"b", "c", "d", "i", "o", "u"}},
 		{b, a, []string{"b", "c", "d", "i", "o", "u"}},
@@ -316,7 +316,7 @@ func TestSymDiff(t *testing.T) {
 		{c, b, []string{"a", "d", "f", "o", "u"}},
 	}
 	for _, test := range tests {
-		got := test.left.SymDiff(test.right).Keys()
+		got := test.left.SymDiff(test.right).Elements()
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("%v ∆ %v: got %+q, want %+q", test.left, test.right, got, test.want)
 		}
@@ -336,7 +336,7 @@ func TestUpdate(t *testing.T) {
 	}
 	for _, test := range tests {
 		ok := test.before.Update(test.update)
-		if got := test.before.Keys(); !reflect.DeepEqual(got, test.want) {
+		if got := test.before.Elements(); !reflect.DeepEqual(got, test.want) {
 			t.Errorf("Update %v: got %+q, want %+q", test.before, got, test.want)
 		}
 		if ok != test.changed {
@@ -358,7 +358,7 @@ func TestAdd(t *testing.T) {
 	}
 	for _, test := range tests {
 		ok := test.before.Add(test.update...)
-		if got := test.before.Keys(); !reflect.DeepEqual(got, test.want) {
+		if got := test.before.Elements(); !reflect.DeepEqual(got, test.want) {
 			t.Errorf("Add %v: got %+q, want %+q", test.before, got, test.want)
 		}
 		if ok != test.changed {
@@ -381,7 +381,7 @@ func TestRemove(t *testing.T) {
 	}
 	for _, test := range tests {
 		ok := test.before.Remove(test.update)
-		if got := test.before.Keys(); !reflect.DeepEqual(got, test.want) {
+		if got := test.before.Elements(); !reflect.DeepEqual(got, test.want) {
 			t.Errorf("Remove %v: got %+q, want %+q", test.before, got, test.want)
 		}
 		if ok != test.changed {
@@ -404,7 +404,7 @@ func TestDiscard(t *testing.T) {
 	}
 	for _, test := range tests {
 		ok := test.before.Discard(test.update...)
-		if got := test.before.Keys(); !reflect.DeepEqual(got, test.want) {
+		if got := test.before.Elements(); !reflect.DeepEqual(got, test.want) {
 			t.Errorf("Discard %v: got %+q, want %+q", test.before, got, test.want)
 		}
 		if ok != test.changed {
@@ -645,7 +645,7 @@ func ExampleSet_Add() {
 func ExampleSet_Select() {
 	re := regexp.MustCompile(`[a-z]\d+`)
 	s := New("a", "b15", "c9", "q").Select(re.MatchString)
-	fmt.Println(s.Keys())
+	fmt.Println(s.Elements())
 	// Output: [b15 c9]
 }
 

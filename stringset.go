@@ -46,7 +46,7 @@ func (s Set) String() string {
 		return "ø"
 	}
 	keys := make([]string, len(s))
-	for i, k := range s.Keys() {
+	for i, k := range s.Elements() {
 		keys[i] = strconv.Quote(k)
 	}
 	return "{" + strings.Join(keys, ", ") + "}"
@@ -68,8 +68,8 @@ func New(ss ...string) Set {
 // Len returns the number of elements in s.
 func (s Set) Len() int { return len(s) }
 
-// Keys returns a lexicographically sorted slice of the elements in s.
-func (s Set) Keys() []string {
+// Elements returns a lexicographically ordered slice of the elements in s.
+func (s Set) Elements() []string {
 	var keys []string
 	for k := range s {
 		keys = append(keys, k)
