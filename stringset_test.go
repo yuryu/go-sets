@@ -630,9 +630,9 @@ func ExampleSet_Union() {
 
 func ExampleSet_Discard() {
 	nat := New("0", "1", "2", "3", "4")
-	nat.Discard("2", "4", "6")
-	fmt.Println(nat)
-	// Output: {"0", "1", "3"}
+	ok := nat.Discard("2", "4", "6")
+	fmt.Println(ok, nat)
+	// Output: true {"0", "1", "3"}
 }
 
 func ExampleSet_Add() {
