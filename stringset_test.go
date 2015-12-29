@@ -618,41 +618,41 @@ func TestFromKeys(t *testing.T) {
 	}
 }
 
-func ExampleIntersect() {
+func ExampleSet_Intersect() {
 	one := New("one")
 	fmt.Println(one.Intersect(nil))
 	// Output: ø
 }
 
-func ExampleUnion() {
+func ExampleSet_Union() {
 	nat := New("0", "1", "2", "3", "4")
 	some := nat.Union(New("one"))
 	fmt.Println(some)
 	// Output: {"0", "1", "2", "3", "4", "one"}
 }
 
-func ExampleDiscard() {
+func ExampleSet_Discard() {
 	nat := New("0", "1", "2", "3", "4")
 	nat.Discard("2", "4", "6")
 	fmt.Println(nat)
 	// Output: {"0", "1", "3"}
 }
 
-func ExampleAdd() {
+func ExampleSet_Add() {
 	one := New("one")
 	one.Add("one", "perfect", "question")
 	fmt.Println(one)
 	// Output: {"one", "perfect", "question"}
 }
 
-func ExampleSelect() {
+func ExampleSet_Select() {
 	re := regexp.MustCompile(`[a-z]\d+`)
 	s := New("a", "b15", "c9", "q").Select(re.MatchString)
 	fmt.Println(s.Keys())
 	// Output: [b15 c9]
 }
 
-func ExampleChoose() {
+func ExampleSet_Choose() {
 	s := New("a", "ab", "abc", "abcd")
 	long, ok := s.Choose(func(c string) bool { return len(c) > 3 })
 	fmt.Println(long, ok)
