@@ -429,10 +429,10 @@ func TestMap(t *testing.T) {
 	}
 }
 
-func TestForEach(t *testing.T) {
+func TestEach(t *testing.T) {
 	in := New("alice", "basil", "clara", "desmond", "ernie")
 	saw := make(map[string]int)
-	in.ForEach(func(name string) {
+	in.Each(func(name string) {
 		saw[name]++
 	})
 	for want := range in {
@@ -679,9 +679,9 @@ func ExampleSet_Diff() {
 	// Output: {"b", "c"}
 }
 
-func ExampleSet_ForEach() {
+func ExampleSet_Each() {
 	sum := 0
-	New("one", "two", "three").ForEach(func(s string) {
+	New("one", "two", "three").Each(func(s string) {
 		sum += len(s)
 	})
 	fmt.Println(sum)
