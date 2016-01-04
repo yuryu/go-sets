@@ -550,7 +550,7 @@ func TestKeysOf(t *testing.T) {
 		{"foo", []string{"foo"}},
 
 		// A slice of strings maps to itself.
-		{[]string{"pear", "banana", "tart"}, []string{"pear", "banana", "tart"}},
+		{[]string{"pear", "banana", "tart"}, []string{"banana", "pear", "tart"}},
 
 		// The Set type, which implements Keyer.
 		{Set(nil), nil},
@@ -566,6 +566,7 @@ func TestKeysOf(t *testing.T) {
 	}
 	for _, test := range tests {
 		got := keysOf(test.input)
+		sort.Strings(got)
 		if !reflect.DeepEqual(got, test.want) {
 			t.Errorf("keysOf(%v :: %T): got %+q, want %+q", test.input, test.input, got, test.want)
 		} else {

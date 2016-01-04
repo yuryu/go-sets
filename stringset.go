@@ -279,8 +279,7 @@ type Keyer interface {
 
 // keysOf returns a slice of string keys from v, which must either be a Keyer
 // or have type string, []string or map[string]T. It returns nil if v's type
-// does not have one of these forms. If v is a map value, its keys will be
-// returned in lexicographic order as defined by sort.Strings.
+// does not have one of these forms.
 func keysOf(v interface{}) []string {
 	switch t := v.(type) {
 	case Keyer:
@@ -300,7 +299,6 @@ func keysOf(v interface{}) []string {
 	for _, key := range m.MapKeys() {
 		keys = append(keys, key.Interface().(string))
 	}
-	sort.Strings(keys)
 	return keys
 }
 
