@@ -45,11 +45,11 @@ func (s Set) String() string {
 	if s.Empty() {
 		return "ø"
 	}
-	keys := make([]string, len(s))
+	elts := make([]string, len(s))
 	for i, k := range s.Elements() {
-		keys[i] = strconv.Quote(k)
+		elts[i] = strconv.Quote(k)
 	}
-	return "{" + strings.Join(keys, ", ") + "}"
+	return "{" + strings.Join(elts, ", ") + "}"
 }
 
 // New returns a new set containing exactly the specified elements.  Returns
@@ -70,15 +70,15 @@ func (s Set) Len() int { return len(s) }
 
 // Elements returns a lexicographically ordered slice of the elements in s.
 func (s Set) Elements() []string {
-	var keys []string
+	var elts []string
 	for k := range s {
-		keys = append(keys, k)
+		elts = append(elts, k)
 	}
-	sort.Strings(keys)
-	return keys
+	sort.Strings(elts)
+	return elts
 }
 
-// Clone returns a new Set distinct from s, containing the same keys.
+// Clone returns a new Set distinct from s, containing the same elements.
 func (s Set) Clone() Set {
 	var c Set
 	c.Update(s)
