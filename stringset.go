@@ -1,31 +1,15 @@
-// Package stringset implements a lightweight (finite) set-of-strings type
-// based on Go's built-in map type.  A Set provides some convenience methods
-// for common set operations.  A nil Set is ready for use as an empty set.  The
-// basic set methods (Diff, Intersect, Union, IsSubset, Map, Choose, Partition)
-// do not mutate their arguments.
+// Package stringset implements a lightweight (finite) set-of-string type
+// based on Go's built-in map.  A Set provides some convenience methods for
+// common set operations.
 //
-// There are also mutating operations (Add, Discard, Pop, Remove, Update) that
-// modify their receiver in-place.
+// A nil Set is ready for use as an empty set.  The basic set methods (Diff,
+// Intersect, Union, IsSubset, Map, Choose, Partition) do not mutate their
+// arguments.  There are also mutating operations (Add, Discard, Pop, Remove,
+// Update) that modify their receiver in-place.
 //
 // A Set can also be traversed and modified using the normal map operations.
 // Being a map, a Set is not safe for concurrent access by multiple goroutines
 // unless all the concurrent accesses are reads.
-//
-// Example:
-//    one := stringset.New("one") // ⇒ {"one"}
-//    none := one.Intersect(nil)  // ⇒ ø
-//    nat := stringset.New("0", "1", "2", "3", "4")
-//    some := nat.Union(one)
-//     // ⇒ {"0", "1", "2", "3", "4", "one"}
-//
-//    nat.Discard("2", "4")
-//    fmt.Println(nat)
-//     // ⇒ {"0", "1", "3"}
-//
-//    one.Add("one", "perfect", "question")
-//    fmt.Println(one)
-//     // ⇒ {"one", "perfect", "question"}
-//
 package stringset
 
 import (
@@ -35,32 +19,45 @@ import (
 	"strings"
 )
 
+func toString(x string) string {
+	return strconv.Quote(x)
+}
+
 // A Set represents a set of string values.  A nil Set is a valid
 // representation of an empty set.
 type Set map[string]struct{}
 
+// byElement satisfies sort.Interface to order values of type string.
+type byElement []string
+
+func (e byElement) Len() int      { return len(e) }
+func (e byElement) Swap(i, j int) { e[i], e[j] = e[j], e[i] }
+func (e byElement) Less(i, j int) bool {
+	return e[i] < e[j]
+}
+
 // String implements the fmt.Stringer interface.  It renders s in standard set
-// notation, e.g., ø for an empty set, {"a", "b", "c"} for a nonempty one.
+// notation, e.g., ø for an empty set, {a, b, c} for a nonempty one.
 func (s Set) String() string {
 	if s.Empty() {
 		return "ø"
 	}
 	elts := make([]string, len(s))
-	for i, k := range s.Elements() {
-		elts[i] = strconv.Quote(k)
+	for i, elt := range s.Elements() {
+		elts[i] = toString(elt)
 	}
 	return "{" + strings.Join(elts, ", ") + "}"
 }
 
-// New returns a new set containing exactly the specified elements.  Returns
-// nil if no elements are specified.
-func New(ss ...string) Set {
-	if len(ss) == 0 {
+// New returns a new set containing exactly the specified elements.
+// Returns nil if no elements are specified.
+func New(elts ...string) Set {
+	if len(elts) == 0 {
 		return nil
 	}
 	set := make(Set)
-	for _, s := range ss {
-		set[s] = struct{}{}
+	for _, elt := range elts {
+		set[elt] = struct{}{}
 	}
 	return set
 }
@@ -68,13 +65,13 @@ func New(ss ...string) Set {
 // Len returns the number of elements in s.
 func (s Set) Len() int { return len(s) }
 
-// Elements returns a lexicographically ordered slice of the elements in s.
+// Elements returns an ordered slice of the elements in s.
 func (s Set) Elements() []string {
 	var elts []string
-	for k := range s {
-		elts = append(elts, k)
+	for elt := range s {
+		elts = append(elts, elt)
 	}
-	sort.Strings(elts)
+	sort.Sort(byElement(elts))
 	return elts
 }
 
@@ -85,12 +82,12 @@ func (s Set) Clone() Set {
 	return c
 }
 
-// ContainsAny reports whether s contains one or more of the given strings.
+// ContainsAny reports whether s contains one or more of the given elements.
 // It is equivalent in meaning to
-//   s.Intersects(stringset.New(strs...))
+//   s.Intersects(stringset.New(elts...))
 // but does not construct an intermediate set.
-func (s Set) ContainsAny(strs ...string) bool {
-	for _, key := range strs {
+func (s Set) ContainsAny(elts ...string) bool {
+	for _, key := range elts {
 		if _, ok := s[key]; ok {
 			return true
 		}
@@ -98,13 +95,13 @@ func (s Set) ContainsAny(strs ...string) bool {
 	return false
 }
 
-// Contains reports whether s contains (all) the given strings.
+// Contains reports whether s contains (all) the given elements.
 // It is equivalent in meaning to
-//   New(strs...).IsSubset(s)
+//   New(elts...).IsSubset(s)
 // but does not construct an intermediate set.
-func (s Set) Contains(strs ...string) bool {
-	for _, str := range strs {
-		if _, ok := s[str]; !ok {
+func (s Set) Contains(elts ...string) bool {
+	for _, elt := range elts {
+		if _, ok := s[elt]; !ok {
 			return false
 		}
 	}
@@ -218,7 +215,7 @@ func (s1 *Set) Update(s2 Set) bool {
 	return len(*s1) != in
 }
 
-// Add adds the specified strings to *s in-place and reports whether anything
+// Add adds the specified elements to *s in-place and reports whether anything
 // was added.  If *s == nil, a new set equivalent to New(ss...) is stored in *s.
 func (s *Set) Add(ss ...string) bool {
 	in := len(*s)
@@ -245,25 +242,25 @@ func (s1 Set) Remove(s2 Set) bool {
 	return s1.Len() != in
 }
 
-// Discard removes the elements of ss from s in-place and reports whether
+// Discard removes the elements of elts from s in-place and reports whether
 // anything was removed.
 //
-// Equivalent to s.Remove(New(ss...)), but does not allocate an intermediate
+// Equivalent to s.Remove(New(elts...)), but does not allocate an intermediate
 // set for ss.
-func (s Set) Discard(ss ...string) bool {
+func (s Set) Discard(elts ...string) bool {
 	in := s.Len()
 	if !s.Empty() {
-		for _, key := range ss {
-			delete(s, key)
+		for _, elt := range elts {
+			delete(s, elt)
 		}
 	}
 	return s.Len() != in
 }
 
 // Index returns the first offset of needle in ss, if it occurs; otherwise -1.
-func Index(needle string, ss ...string) int {
-	for i, s := range ss {
-		if s == needle {
+func Index(needle string, elts ...string) int {
+	for i, elt := range elts {
+		if elt == needle {
 			return i
 		}
 	}
@@ -277,9 +274,11 @@ type Keyer interface {
 	Keys() []string
 }
 
-// keysOf returns a slice of string keys from v, which must either be a Keyer
-// or have type string, []string or map[string]T. It returns nil if v's type
-// does not have one of these forms.
+var refType = reflect.TypeOf((*string)(nil)).Elem()
+
+// keysOf returns a slice of keys from v, which must either be a Keyer or have
+// type string, []string or map[string]T.
+// It returns nil if v's type does not have one of these forms.
 func keysOf(v interface{}) []string {
 	switch t := v.(type) {
 	case Keyer:
@@ -292,7 +291,7 @@ func keysOf(v interface{}) []string {
 		return nil
 	}
 	m := reflect.ValueOf(v)
-	if m.Kind() != reflect.Map || m.Type().Key().Kind() != reflect.String {
+	if m.Kind() != reflect.Map || m.Type().Key() != refType {
 		return nil
 	}
 	var keys []string
@@ -305,7 +304,7 @@ func keysOf(v interface{}) []string {
 // FromValues returns a Set of the values from v, which has type map[T]string.
 // Returns the empty set if v does not have a type of this form.
 func FromValues(v interface{}) Set {
-	if t := reflect.TypeOf(v); t == nil || t.Kind() != reflect.Map || t.Elem().Kind() != reflect.String {
+	if t := reflect.TypeOf(v); t == nil || t.Kind() != reflect.Map || t.Elem() != refType {
 		return nil
 	}
 	var set Set
@@ -316,7 +315,7 @@ func FromValues(v interface{}) Set {
 	return set
 }
 
-// FromKeys returns a Set of the strings from v, which must either be a Keyer
-// or have type string, []string or map[string]T. It returns nil if v's type
-// does not have one of these forms.
+// FromKeys returns a Set of the strings from v, which must either be a
+// Keyer or have type string, []string or map[string]T.
+// It returns nil if v's type does not have one of these forms.
 func FromKeys(v interface{}) Set { return New(keysOf(v)...) }
