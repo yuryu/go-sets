@@ -1,0 +1,7 @@
+{
+  "type": "string",
+  "package": "stringset",
+  "zero": "\"\"",
+  "toString": "return strconv.Quote(x)",
+  "imports": ["strconv"]
+}

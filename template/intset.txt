@@ -1,0 +1,7 @@
+{
+  "type": "int",
+  "package": "intset",
+  "zero": "0",
+  "toString": "return strconv.Itoa(x)",
+  "imports": ["strconv"]
+}
