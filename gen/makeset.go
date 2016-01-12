@@ -551,4 +551,14 @@ func (s Set) Pop(f func({{.Type}}) bool) ({{.Type}}, bool) {
 		return v, true
 	}
 	return {{.Zero}}, false
+}
+
+// Count returns the number of elements of s for which f returns true.
+func (s Set) Count(f func({{.Type}}) bool) (n int) {
+	for k := range s {
+		if f(k) {
+			n++
+		}
+	}
+	return
 }`

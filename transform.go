@@ -62,3 +62,13 @@ func (s Set) Pop(f func(string) bool) (string, bool) {
 	}
 	return "", false
 }
+
+// Count returns the number of elements of s for which f returns true.
+func (s Set) Count(f func(string) bool) (n int) {
+	for k := range s {
+		if f(k) {
+			n++
+		}
+	}
+	return
+}

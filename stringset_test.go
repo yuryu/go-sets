@@ -509,6 +509,17 @@ func TestPartition(t *testing.T) {
 	}
 }
 
+func TestCount(t *testing.T) {
+	in := New("three", "great", "apes", "ate", "moldy", "bananas", "in", "kansas")
+	t.Logf("Input set: %s", in)
+	if got, want := in.Count(func(s string) bool { return s[0] == 'a' }), 2; got != want {
+		t.Errorf("Count(s[0]=='a'): got %d, want %d", got, want)
+	}
+	if got, want := in.Count(func(s string) bool { return len(s) < 5 }), 3; got != want {
+		t.Errorf("Count(len(s) < 5): got %d, want %d", got, want)
+	}
+}
+
 func TestIndex(t *testing.T) {
 	tests := []struct {
 		needle string
