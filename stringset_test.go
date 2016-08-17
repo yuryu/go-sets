@@ -80,7 +80,7 @@ func TestMembership(t *testing.T) {
 	// Test non-mutating selection.
 	re := regexp.MustCompile("^e")
 	if got, ok := s.Choose(re.MatchString); !ok {
-		t.Error(`Choose(%q): missing element`, re)
+		t.Errorf(`Choose(%q): missing element`, re)
 	} else {
 		t.Logf(`Found %q for regexp %q`, got, re)
 	}
