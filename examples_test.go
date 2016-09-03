@@ -2,6 +2,7 @@ package stringset
 
 import (
 	"fmt"
+	"path/filepath"
 	"regexp"
 )
 
@@ -120,4 +121,14 @@ func ExampleFromValues() {
 	})
 	fmt.Println(s)
 	// Output: {"blue", "green", "red"}
+}
+
+func ExampleSet_Map() {
+	names := New("stdio.h", "main.cc", "lib.go", "BUILD", "fixup.py")
+	ext := names.Map(filepath.Ext)
+	fmt.Println(ext)
+	fmt.Println("Legacy:", ext.Contains(".h", ".cc"))
+	// Output:
+	// {"", ".cc", ".go", ".h", ".py"}
+	// Legacy: true
 }
