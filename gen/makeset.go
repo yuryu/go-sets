@@ -422,7 +422,7 @@ func (s Set) Discard(elts ...{{.Type}}) bool {
 	return s.Len() != in
 }
 
-// Index returns the first offset of needle in ss, if it occurs; otherwise -1.
+// Index returns the first offset of needle in elts, if it occurs; otherwise -1.
 func Index(needle {{.Type}}, elts ...{{.Type}}) int {
 	for i, elt := range elts {
 		if elt == needle {
