@@ -236,11 +236,20 @@ func (s Set) Len() int { return len(s) }
 
 // Elements returns an ordered slice of the elements in s.
 func (s Set) Elements() []{{.Type}} {
-	var elts []{{.Type}}
+    elts := s.Unordered()
+    sort.Sort(byElement(elts))
+    return elts
+}
+
+// Unordered returns an unordered slice of the elements in s.
+func (s Set) Unordered() []{{.Type}} {
+    if len(s) == 0 {
+      return nil
+    }
+	elts := make([]{{.Type}}, 0, len(s))
 	for elt := range s {
 		elts = append(elts, elt)
 	}
-	sort.Sort(byElement(elts))
 	return elts
 }
 

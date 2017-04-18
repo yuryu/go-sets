@@ -62,16 +62,29 @@ func New(elts ...string) Set {
 	return set
 }
 
+// NewSize returns a new empty set pre-sized to hold at least n elements.
+// This will panic if n < 0.
+func NewSize(n int) Set { return make(Set, n) }
+
 // Len returns the number of elements in s.
 func (s Set) Len() int { return len(s) }
 
 // Elements returns an ordered slice of the elements in s.
 func (s Set) Elements() []string {
-	var elts []string
+	elts := s.Unordered()
+	sort.Sort(byElement(elts))
+	return elts
+}
+
+// Unordered returns an unordered slice of the elements in s.
+func (s Set) Unordered() []string {
+	if len(s) == 0 {
+		return nil
+	}
+	elts := make([]string, 0, len(s))
 	for elt := range s {
 		elts = append(elts, elt)
 	}
-	sort.Sort(byElement(elts))
 	return elts
 }
 
