@@ -227,6 +227,10 @@ func New(elts ...{{.Type}}) Set {
 	return set
 }
 
+// NewSize returns a new empty set pre-sized to hold at least n elements.
+// This is equivalent to make(Set, n) and will panic if n < 0.
+func NewSize(n int) Set { return make(Set, n) }
+
 // Len returns the number of elements in s.
 func (s Set) Len() int { return len(s) }
 
