@@ -535,7 +535,7 @@ func TestIndex(t *testing.T) {
 		{"", []string{"a", "c", "", "q", ""}, 2},
 	}
 	for _, test := range tests {
-		got := Index(test.needle, test.keys...)
+		got := Index(test.needle, test.keys)
 		if got != test.want {
 			t.Errorf("Index(%q, %q): got %d, want %d", test.needle, test.keys, got, test.want)
 		}

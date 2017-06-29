@@ -63,7 +63,7 @@ func New(elts ...string) Set {
 }
 
 // NewSize returns a new empty set pre-sized to hold at least n elements.
-// This will panic if n < 0.
+// This is equivalent to make(Set, n) and will panic if n < 0.
 func NewSize(n int) Set { return make(Set, n) }
 
 // Len returns the number of elements in s.
@@ -271,7 +271,7 @@ func (s Set) Discard(elts ...string) bool {
 }
 
 // Index returns the first offset of needle in elts, if it occurs; otherwise -1.
-func Index(needle string, elts ...string) int {
+func Index(needle string, elts []string) int {
 	for i, elt := range elts {
 		if elt == needle {
 			return i
