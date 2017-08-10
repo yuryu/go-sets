@@ -18,8 +18,8 @@ func TestEmptiness(t *testing.T) {
 	if !s.Empty() {
 		t.Errorf("Empty Set is not reported empty: %v", s)
 	}
-	if s != nil {
-		t.Errorf("New() returned non-nil: %v", s)
+	if s == nil {
+		t.Error("New() unexpectedly returned nil")
 	}
 
 	if s := New("something"); s.Empty() {

@@ -215,11 +215,8 @@ func (s Set) String() string {
 }
 
 // New returns a new set containing exactly the specified elements.  
-// Returns nil if no elements are specified.
+// Returns a non-nil empty Set if no elements are specified.
 func New(elts ...{{.Type}}) Set {
-	if len(elts) == 0 {
-		return nil
-	}
 	set := make(Set)
 	for _, elt := range elts {
 		set[elt] = struct{}{}
