@@ -277,6 +277,24 @@ func Index(needle string, elts []string) int {
 	return -1
 }
 
+// Contains reports whether v contains s, for v having type []string,
+// map[string]T, or Keyer. It returns false if v's type does not have one of
+// these forms.
+func Contains(v interface{}, s string) bool {
+	switch t := v.(type) {
+	case []string:
+		return Index(s, t) >= 0
+	case Set:
+		return t.Contains(s)
+	case Keyer:
+		return Index(s, t.Keys()) >= 0
+	}
+	if m := reflect.ValueOf(v); m.IsValid() && m.Kind() == reflect.Map && m.Type().Key() == refType {
+		return reflect.ValueOf(v).MapIndex(reflect.ValueOf(s)).IsValid()
+	}
+	return false
+}
+
 // A Keyer implements a Keys method that returns the keys of a collection such
 // as a map or a Set.
 type Keyer interface {

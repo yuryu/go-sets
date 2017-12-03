@@ -628,3 +628,44 @@ func TestFromKeys(t *testing.T) {
 		}
 	}
 }
+
+func TestContainsFunc(t *testing.T) {
+	tests := []struct {
+		input  interface{}
+		needle string
+		want   bool
+	}{
+		{[]string(nil), "x", false},
+		{[]string{}, "x", false},
+		{[]string{"x"}, "x", true},
+		{[]string{"y"}, "x", false},
+		{[]string{"a", "b", "x", "c"}, "x", true},
+
+		{map[string]int(nil), "q", false},
+		{map[string]int{}, "q", false},
+		{map[string]int{"q": 1}, "q", true},
+		{map[string]int{"v": 3}, "q", false},
+		{map[string]float32{"q": 1, "r": 2}, "q", true},
+		{map[string]float32{"s": 0, "t": 1, "f": 2, "u": 3}, "q", false},
+
+		{Set(nil), "m", false},
+		{New(), "m", false},
+		{New("m"), "m", true},
+		{New("p"), "m", false},
+		{New("a", "b"), "m", false},
+		{New("a", "m", "b"), "m", true},
+
+		{keyer(nil), "*", false},
+		{keyer{}, "*", false},
+		{keyer{"*"}, "*", true},
+		{keyer{"?"}, "*", false},
+		{keyer{"a", "s", "*"}, "*", true},
+		{keyer{"a", "s", "k"}, "*", false},
+	}
+	for _, test := range tests {
+		got := Contains(test.input, test.needle)
+		if got != test.want {
+			t.Errorf("Contains(%v, %q): got %v, want %v", test.input, test.needle, got, test.want)
+		}
+	}
+}
