@@ -442,7 +442,7 @@ func Index(needle {{.Type}}, elts []{{.Type}}) int {
 	return -1
 }
 
-// Contains reports whether v contains s, for v having type []{{.Type}},
+// Contains reports whether v contains s, for v having type Set, []{{.Type}},
 // map[{{.Type}}]T, or Keyer. It returns false if v's type does not have one of
 // these forms.
 func Contains(v interface{}, s {{.Type}}) bool {

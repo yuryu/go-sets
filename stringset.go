@@ -277,7 +277,7 @@ func Index(needle string, elts []string) int {
 	return -1
 }
 
-// Contains reports whether v contains s, for v having type []string,
+// Contains reports whether v contains s, for v having type Set, []string,
 // map[string]T, or Keyer. It returns false if v's type does not have one of
 // these forms.
 func Contains(v interface{}, s string) bool {
