@@ -551,40 +551,6 @@ func (k keyer) Keys() []string {
 	return p
 }
 
-func TestKeysOf(t *testing.T) {
-	tests := []struct {
-		input interface{}
-		want  []string
-	}{
-		// A single string, which is its own (single) key.
-		{"foo", []string{"foo"}},
-
-		// A slice of strings maps to itself.
-		{[]string{"pear", "banana", "tart"}, []string{"banana", "pear", "tart"}},
-
-		// The Set type, which implements Keyer.
-		{Set(nil), nil},
-		{New("s", "p", "q", "r"), []string{"p", "q", "r", "s"}},
-
-		// A non-Set Keyer.
-		{keyer{"z", "x", "a", "y", "z"}, []string{"a", "x", "y", "z", "z"}},
-
-		// Various map types with string keys.
-		{map[string]string(nil), nil},
-		{map[string]int{"ten": 10, "nine": 9, "eight": 8}, []string{"eight", "nine", "ten"}},
-		{map[string]string{"4": "four", "1": "one", "5": "five", "9": "nine"}, []string{"1", "4", "5", "9"}},
-	}
-	for _, test := range tests {
-		got := keysOf(test.input)
-		sort.Strings(got)
-		if !reflect.DeepEqual(got, test.want) {
-			t.Errorf("keysOf(%v :: %T): got %+q, want %+q", test.input, test.input, got, test.want)
-		} else {
-			t.Logf("keysOf(%v :: %T) OK %+q", test.input, test.input, got)
-		}
-	}
-}
-
 func TestFromValues(t *testing.T) {
 	tests := []struct {
 		input interface{}
@@ -609,22 +575,24 @@ func TestFromValues(t *testing.T) {
 func TestFromKeys(t *testing.T) {
 	tests := []struct {
 		input interface{}
-		want  []string
+		want  Set
 	}{
 		{3.5, nil},                  // unkeyable type
 		{map[int]int{1: 1}, nil},    // unkeyable type
 		{nil, nil},                  // empty
 		{[]string{}, nil},           // empty
 		{map[string]float64{}, nil}, // empty
-		{"foo", []string{"foo"}},
-		{[]string{"foo", "bar", "foo", "foo"}, []string{"foo", "bar"}},
-		{map[string]int{"one": 1, "two": 2}, []string{"one", "two"}},
+		{"foo", New("foo")},
+		{[]string{"foo", "bar", "foo", "foo"}, New("foo", "bar")},
+		{map[string]int{"one": 1, "two": 2}, New("one", "two")},
+		{keyer{"alpha", "charlie", "echo"}, New("alpha", "charlie", "echo")},
+		{New("p", "d", "q"), New("p", "d", "q")},
+		{map[string]struct{}{"fizz": struct{}{}, "buzz": struct{}{}}, New("fizz", "buzz")},
 	}
 	for _, test := range tests {
 		got := FromKeys(test.input)
-		want := New(test.want...)
-		if !got.Equals(want) {
-			t.Errorf("MapKeys %v: got %v, want %v", test.input, got, want)
+		if !got.Equals(test.want) {
+			t.Errorf("MapKeys %v: got %v, want %v", test.input, got, test.want)
 		}
 	}
 }

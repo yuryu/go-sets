@@ -304,17 +304,29 @@ type Keyer interface {
 
 var refType = reflect.TypeOf((*string)(nil)).Elem()
 
-// keysOf returns a slice of keys from v, which must either be a Keyer or have
-// type string, []string or map[string]T.
-// It returns nil if v's type does not have one of these forms.
-func keysOf(v interface{}) []string {
+// FromKeys returns a Set of type strings from v, which must either be
+// a string, a []string, a map[string]T, or a Keyer. It returns nil
+// if v's type does not have one of these forms.
+func FromKeys(v interface{}) Set {
+	var result Set
 	switch t := v.(type) {
-	case Keyer:
-		return t.Keys()
-	case []string:
-		return t
 	case string:
-		return []string{t}
+		return New(t)
+	case []string:
+		for _, key := range t {
+			result.Add(key)
+		}
+		return result
+	case map[string]struct{}: // includes Set
+		for key := range t {
+			result.Add(key)
+		}
+		return result
+	case Keyer:
+		for _, key := range t.Keys() {
+			result.Add(key)
+		}
+		return result
 	case nil:
 		return nil
 	}
@@ -322,11 +334,10 @@ func keysOf(v interface{}) []string {
 	if m.Kind() != reflect.Map || m.Type().Key() != refType {
 		return nil
 	}
-	var keys []string
 	for _, key := range m.MapKeys() {
-		keys = append(keys, key.Interface().(string))
+		result.Add(key.Interface().(string))
 	}
-	return keys
+	return result
 }
 
 // FromValues returns a Set of the values from v, which has type map[T]string.
@@ -342,8 +353,3 @@ func FromValues(v interface{}) Set {
 	}
 	return set
 }
-
-// FromKeys returns a Set of the strings from v, which must either be a
-// Keyer or have type string, []string or map[string]T.
-// It returns nil if v's type does not have one of these forms.
-func FromKeys(v interface{}) Set { return New(keysOf(v)...) }
