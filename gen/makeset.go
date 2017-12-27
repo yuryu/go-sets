@@ -455,7 +455,7 @@ func Contains(v interface{}, s {{.Type}}) bool {
 		return Index(s, t.Keys()) >= 0
 	}
 	if m := reflect.ValueOf(v); m.IsValid() && m.Kind() == reflect.Map && m.Type().Key() == refType {
-		return reflect.ValueOf(v).MapIndex(reflect.ValueOf(s)).IsValid()
+		return m.MapIndex(reflect.ValueOf(s)).IsValid()
 	}
 	return false
 }
