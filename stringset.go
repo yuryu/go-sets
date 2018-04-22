@@ -122,7 +122,7 @@ func (s Set) Contains(elts ...string) bool {
 func (s1 Set) IsSubset(s2 Set) bool {
 	if s1.Empty() {
 		return true
-	} else if s2.Empty() {
+	} else if len(s1) > len(s2) || s2.Empty() {
 		return false
 	}
 	for k := range s1 {
