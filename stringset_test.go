@@ -204,11 +204,17 @@ func TestEquality(t *testing.T) {
 
 		// Various set operations...
 		{nat.Intersect(odd), odd, true},
+		{odd, nat.Intersect(odd), true},
 		{odd.Intersect(nat), odd, true},
+		{odd, odd.Intersect(nat), true},
 		{nat.Intersect(nat), nat, true},
+		{nat, nat.Intersect(nat), true},
 		{nat.Union(odd), nat, true},
+		{nat, nat.Union(odd), true},
 		{odd.Diff(nat), odd, false},
+		{odd, odd.Diff(nat), false},
 		{odd.Diff(nat), nil, true},
+		{nil, odd.Diff(nat), true},
 
 		{New("a", "b", "c").Diff(New("b", "m", "x")), New("c").Union(New("a")), true},
 	}

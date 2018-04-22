@@ -299,7 +299,7 @@ func (s1 Set) IsSubset(s2 Set) bool {
 }
 
 // Equals reports whether s1 is equal to s2, having exactly the same elements.
-func (s1 Set) Equals(s2 Set) bool { return s1.IsSubset(s2) && s2.IsSubset(s1) }
+func (s1 Set) Equals(s2 Set) bool { return len(s1) == len(s2) && s1.IsSubset(s2) }
 
 // Empty reports whether s is empty.
 func (s Set) Empty() bool { return len(s) == 0 }
