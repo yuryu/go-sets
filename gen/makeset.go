@@ -568,8 +568,13 @@ func (s Set) Partition(f func({{.Type}}) bool) (yes, no Set) {
 // second result reports whether such an element was found.
 // If f == nil, chooses an arbitrary element of s.
 func (s Set) Choose(f func({{.Type}}) bool) ({{.Type}}, bool) {
+	if f == nil {
+		for k := range s {
+			return k, true
+		}
+	}
 	for k := range s {
-		if f == nil || f(k) {
+		if f(k) {
 			return k, true
 		}
 	}
