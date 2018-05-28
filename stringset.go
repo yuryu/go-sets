@@ -193,14 +193,14 @@ func (s1 Set) Diff(s2 Set) Set {
 	if s1.Empty() || s2.Empty() {
 		return s1
 	}
-	var set Set
+	set := make(Set)
 	for k := range s1 {
 		if _, ok := s2[k]; !ok {
-			if set == nil {
-				set = make(Set)
-			}
 			set[k] = struct{}{}
 		}
+	}
+	if len(set) == 0 {
+		return nil
 	}
 	return set
 }
