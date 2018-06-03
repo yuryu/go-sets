@@ -118,14 +118,14 @@ func (s Set) Contains(elts ...string) bool {
 	return true
 }
 
-// IsSubset reports whether s1 is a subset of s2, s1 ⊆ s2.
-func (s1 Set) IsSubset(s2 Set) bool {
-	if s1.Empty() {
+// IsSubset reports whether s is a subset of s2, s ⊆ s2.
+func (s Set) IsSubset(s2 Set) bool {
+	if s.Empty() {
 		return true
-	} else if len(s1) > len(s2) {
+	} else if len(s) > len(s2) {
 		return false
 	}
-	for k := range s1 {
+	for k := range s {
 		if _, ok := s2[k]; !ok {
 			return false
 		}
@@ -133,16 +133,16 @@ func (s1 Set) IsSubset(s2 Set) bool {
 	return true
 }
 
-// Equals reports whether s1 is equal to s2, having exactly the same elements.
-func (s1 Set) Equals(s2 Set) bool { return len(s1) == len(s2) && s1.IsSubset(s2) }
+// Equals reports whether s is equal to s2, having exactly the same elements.
+func (s Set) Equals(s2 Set) bool { return len(s) == len(s2) && s.IsSubset(s2) }
 
 // Empty reports whether s is empty.
 func (s Set) Empty() bool { return len(s) == 0 }
 
-// Intersects reports whether the intersection s1 ∩ s2 is non-empty, without
+// Intersects reports whether the intersection s ∩ s2 is non-empty, without
 // explicitly constructing the intersection.
-func (s1 Set) Intersects(s2 Set) bool {
-	a, b := s1, s2
+func (s Set) Intersects(s2 Set) bool {
+	a, b := s, s2
 	if len(b) < len(a) {
 		a, b = b, a // Iterate over the smaller set
 	}
@@ -154,15 +154,15 @@ func (s1 Set) Intersects(s2 Set) bool {
 	return false
 }
 
-// Union constructs the union s1 ∪ s2.
-func (s1 Set) Union(s2 Set) Set {
-	if s1.Empty() {
+// Union constructs the union s ∪ s2.
+func (s Set) Union(s2 Set) Set {
+	if s.Empty() {
 		return s2
 	} else if s2.Empty() {
-		return s1
+		return s
 	}
 	set := make(Set)
-	for k := range s1 {
+	for k := range s {
 		set[k] = struct{}{}
 	}
 	for k := range s2 {
@@ -171,13 +171,13 @@ func (s1 Set) Union(s2 Set) Set {
 	return set
 }
 
-// Intersect constructs the intersection s1 ∩ s2.
-func (s1 Set) Intersect(s2 Set) Set {
-	if s1.Empty() || s2.Empty() {
+// Intersect constructs the intersection s ∩ s2.
+func (s Set) Intersect(s2 Set) Set {
+	if s.Empty() || s2.Empty() {
 		return nil
 	}
 	set := make(Set)
-	for k := range s1 {
+	for k := range s {
 		if _, ok := s2[k]; ok {
 			set[k] = struct{}{}
 		}
@@ -188,13 +188,13 @@ func (s1 Set) Intersect(s2 Set) Set {
 	return set
 }
 
-// Diff constructs the set difference s1 \ s2.
-func (s1 Set) Diff(s2 Set) Set {
-	if s1.Empty() || s2.Empty() {
-		return s1
+// Diff constructs the set difference s \ s2.
+func (s Set) Diff(s2 Set) Set {
+	if s.Empty() || s2.Empty() {
+		return s
 	}
 	set := make(Set)
-	for k := range s1 {
+	for k := range s {
 		if _, ok := s2[k]; !ok {
 			set[k] = struct{}{}
 		}
@@ -205,24 +205,24 @@ func (s1 Set) Diff(s2 Set) Set {
 	return set
 }
 
-// SymDiff constructs the symmetric difference s1 ∆ s2.
-// It is equivalent in meaning to (s1 ∪ s2) \ (s1 ∩ s2).
-func (s1 Set) SymDiff(s2 Set) Set {
-	return s1.Union(s2).Diff(s1.Intersect(s2))
+// SymDiff constructs the symmetric difference s ∆ s2.
+// It is equivalent in meaning to (s ∪ s2) \ (s ∩ s2).
+func (s Set) SymDiff(s2 Set) Set {
+	return s.Union(s2).Diff(s.Intersect(s2))
 }
 
-// Update adds the elements of s2 to *s1 in-place, and reports whether anything
+// Update adds the elements of s2 to *s in-place, and reports whether anything
 // was added.
-// If *s1 == nil and s2 ≠ ø, a new set is allocated that is a copy of s2.
-func (s1 *Set) Update(s2 Set) bool {
-	in := len(*s1)
-	if *s1 == nil && len(s2) > 0 {
-		*s1 = make(Set)
+// If *s == nil and s2 ≠ ø, a new set is allocated that is a copy of s2.
+func (s *Set) Update(s2 Set) bool {
+	in := len(*s)
+	if *s == nil && len(s2) > 0 {
+		*s = make(Set)
 	}
 	for k := range s2 {
-		(*s1)[k] = struct{}{}
+		(*s)[k] = struct{}{}
 	}
-	return len(*s1) != in
+	return len(*s) != in
 }
 
 // Add adds the specified elements to *s in-place and reports whether anything
@@ -238,18 +238,18 @@ func (s *Set) Add(ss ...string) bool {
 	return len(*s) != in
 }
 
-// Remove removes the elements of s2 from s1 in-place and reports whether
+// Remove removes the elements of s2 from s in-place and reports whether
 // anything was removed.
 //
-// Equivalent to s1 = s1.Diff(s2), but does not allocate a new set.
-func (s1 Set) Remove(s2 Set) bool {
-	in := s1.Len()
-	if !s1.Empty() {
+// Equivalent to s = s.Diff(s2), but does not allocate a new set.
+func (s Set) Remove(s2 Set) bool {
+	in := s.Len()
+	if !s.Empty() {
 		for k := range s2 {
-			delete(s1, k)
+			delete(s, k)
 		}
 	}
-	return s1.Len() != in
+	return s.Len() != in
 }
 
 // Discard removes the elements of elts from s in-place and reports whether
