@@ -593,7 +593,7 @@ func TestFromKeys(t *testing.T) {
 		{map[string]int{"one": 1, "two": 2}, New("one", "two")},
 		{keyer{"alpha", "charlie", "echo"}, New("alpha", "charlie", "echo")},
 		{New("p", "d", "q"), New("p", "d", "q")},
-		{map[string]struct{}{"fizz": struct{}{}, "buzz": struct{}{}}, New("fizz", "buzz")},
+		{map[string]struct{}{"fizz": {}, "buzz": {}}, New("fizz", "buzz")},
 	}
 	for _, test := range tests {
 		got := FromKeys(test.input)
