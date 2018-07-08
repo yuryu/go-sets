@@ -3,5 +3,6 @@
   "package": "stringset",
   "zero": "\"\"",
   "toString": "return strconv.Quote(x)",
-  "imports": ["strconv"]
+  "imports": ["strconv"],
+  "transforms": true
 }

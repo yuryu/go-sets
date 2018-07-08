@@ -3,5 +3,6 @@
   "package": "intset",
   "zero": "0",
   "toString": "return strconv.Itoa(x)",
-  "imports": ["strconv"]
+  "imports": ["strconv"],
+  "transforms": true
 }

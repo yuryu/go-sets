@@ -304,9 +304,9 @@ type Keyer interface {
 
 var refType = reflect.TypeOf((*string)(nil)).Elem()
 
-// FromKeys returns a Set of type strings from v, which must either be
-// a string, a []string, a map[string]T, or a Keyer. It returns nil
-// if v's type does not have one of these forms.
+// FromKeys returns a Set of strings from v, which must either be a string,
+// a []string, a map[string]T, or a Keyer. It returns nil if v's type does
+// not have one of these forms.
 func FromKeys(v interface{}) Set {
 	var result Set
 	switch t := v.(type) {

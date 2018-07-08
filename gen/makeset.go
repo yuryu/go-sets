@@ -57,6 +57,9 @@ type Config struct {
 
 	// If set, additional packages to import in the generated code.
 	Imports []string `json:"imports,omitempty"`
+
+	// If true, include transformations, e.g., Map, Partition, Each.
+	Transforms bool `json:"transforms,omitempty"`
 }
 
 func (c *Config) validate() error {
@@ -148,9 +151,11 @@ func main() {
 	if err := generate(mainT, conf, mainPath); err != nil {
 		log.Fatal(err)
 	}
-	utilPath := filepath.Join(*outDir, "transform.go")
-	if err := generate(utilT, conf, utilPath); err != nil {
-		log.Fatal(err)
+	if conf.Transforms {
+		utilPath := filepath.Join(*outDir, "transform.go")
+		if err := generate(utilT, conf, utilPath); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
@@ -469,9 +474,9 @@ type Keyer interface {
 
 var refType = reflect.TypeOf((*{{.Type}})(nil)).Elem()
 
-// FromKeys returns a Set of type {{.Type}}s from v, which must either be
-// a {{.Type}}, a []{{.Type}}, a map[{{.Type}}]T, or a Keyer. It returns nil
-// if v's type does not have one of these forms.
+// FromKeys returns a Set of {{.Type}}s from v, which must either be a {{.Type}},
+// a []{{.Type}}, a map[{{.Type}}]T, or a Keyer. It returns nil if v's type does
+// not have one of these forms.
 func FromKeys(v interface{}) Set {
     var result Set
 	switch t := v.(type) {
