@@ -35,7 +35,8 @@ type Config struct {
 	Zero string `json:"zero"`
 
 	// If set, a type definition is added to the package mapping Type to this
-	// structure, e.g., "struct { ... }".
+	// structure, e.g., "struct { ... }". You may prefix Decl with "=" to
+	// generate a type alias (this requires Go ≥ 1.9).
 	Decl string `json:"decl,omitempty"`
 
 	// If set, the body of a function with signature func(x, y Type) bool
