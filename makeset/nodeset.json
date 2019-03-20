@@ -1,0 +1,9 @@
+{
+  "desc": "A set of Go AST nodes from the go/ast package.",
+  "package": "nodeset",
+  "type": "ast.Node",
+  "zero": "nil",
+  "less": "if x.Pos() == y.Pos() { return x.End() > y.End() } else { return x.Pos() < y.Pos() }",
+  "imports": ["go/ast"],
+  "transforms": false
+}

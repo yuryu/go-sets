@@ -25,6 +25,10 @@ import (
 
 // A Config describes the nature of the set to be constructed.
 type Config struct {
+	// A human-readable description of the set this config defines.
+	// This is ignored by the code generator, but may serve as documentation.
+	Desc string `json:"desc,omitempty"`
+
 	// The name of the resulting set package, e.g., "intset" (required).
 	Package string `json:"package"`
 
