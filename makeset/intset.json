@@ -1,4 +1,5 @@
 {
+  "desc": "A set of int values.",
   "type": "int",
   "package": "intset",
   "zero": "0",

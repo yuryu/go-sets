@@ -1,6 +1,7 @@
 {
-  "type": "string",
+  "desc": "A set of strings, the main package of this module.",
   "package": "stringset",
+  "type": "string",
   "zero": "\"\"",
   "toString": "return strconv.Quote(x)",
   "imports": ["strconv"],
