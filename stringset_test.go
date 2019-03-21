@@ -2,11 +2,33 @@ package stringset
 
 import (
 	"reflect"
-	"regexp"
-	"sort"
-	"strings"
 	"testing"
 )
+
+// testValues contains an ordered sequence of ten set keys used for testing.
+// The order of the keys must reflect the expected order of key listings.
+var testValues = [10]string{
+	"eight", "five", "four", "nine", "one",
+	"seven", "six", "ten", "three", "two",
+}
+
+func testKeys(ixs ...int) (keys []string) {
+	for _, i := range ixs {
+		keys = append(keys, testValues[i])
+	}
+	return
+}
+
+func testSet(ixs ...int) Set { return New(testKeys(ixs...)...) }
+
+func keyPos(key string) int {
+	for i, v := range testValues {
+		if v == key {
+			return i
+		}
+	}
+	return -1
+}
 
 func TestEmptiness(t *testing.T) {
 	var s Set
@@ -22,14 +44,14 @@ func TestEmptiness(t *testing.T) {
 		t.Error("New() unexpectedly returned nil")
 	}
 
-	if s := New("something"); s.Empty() {
+	if s := testSet(0); s.Empty() {
 		t.Errorf("Nonempty Set is reported empty: %v", s)
 	}
 }
 
 func TestClone(t *testing.T) {
-	a := New(strings.Fields("an apple in a basket is worth two in the weasels")...)
-	b := New("a", "an", "the")
+	a := New(testValues[:]...)
+	b := testSet(1, 8, 5)
 	c := a.Clone()
 	c.Remove(b)
 	if c.Equals(a) {
@@ -51,122 +73,121 @@ func TestClone(t *testing.T) {
 func TestUniqueness(t *testing.T) {
 	// Sets should not contain duplicates.  Obviously this is impossible with
 	// the map implementation, but other representations are viable.
-	s := New("e", "a", "a", "c", "a", "b", "d", "c", "a", "e", "d", "e", "c", "a")
-	if got, want := s.Len(), 5; got != want {
+	s := testSet(0, 5, 1, 2, 1, 3, 8, 4, 9, 4, 4, 6, 7, 2, 0, 0, 1, 4, 8, 4, 9)
+	if got, want := s.Len(), len(testValues); got != want {
 		t.Errorf("s.Len(): got %d, want %d [%v]", got, want, s)
 	}
 
 	// Keys should come out sorted.
-	wantKeys := []string{"a", "b", "c", "d", "e"}
-	if got := s.Elements(); !reflect.DeepEqual(got, wantKeys) {
-		t.Errorf("s.Elements(): got %+q, want %+q", got, wantKeys)
+	if got := s.Elements(); !reflect.DeepEqual(got, testValues[:]) {
+		t.Errorf("s.Elements(): got %+q, want %+q", got, testValues)
 	}
 }
 
 func TestMembership(t *testing.T) {
-	const count = 5
-	words := []string{
-		"alpha", "bravo", "charlie", "delta", "echo", "foxtrot",
-		"golf", "hotel", "india", "juliet", "kilo", "lima",
-	}
-	s := New(words[:count]...)
-	for i, w := range words {
-		if got, want := s.ContainsAny(w), i < count; got != want {
-			t.Errorf("s.ContainsAny(%q): got %v, want %v", w, got, want)
+	s := testSet(0, 1, 2, 3, 4)
+	for i, v := range testValues {
+		if got, want := s.ContainsAny(v), i < 5; got != want {
+			t.Errorf("s.ContainsAny(%v): got %v, want %v", v, got, want)
 		}
 	}
 
 	// Test non-mutating selection.
-	re := regexp.MustCompile("^e")
-	if got, ok := s.Choose(re.MatchString); !ok {
-		t.Errorf(`Choose(%q): missing element`, re)
+	if got, ok := s.Choose(func(s string) bool {
+		return s == testValues[0]
+	}); !ok {
+		t.Error("Choose(0): missing element")
 	} else {
-		t.Logf(`Found %q for regexp %q`, got, re)
+		t.Logf("Found %v for element 0", got)
 	}
 	if got, ok := s.Choose(func(string) bool { return false }); ok {
-		t.Errorf(`Choose(impossible): got %q, want ""`, got)
+		t.Errorf(`Choose(impossible): got %v, want ""`, got)
 	}
 	if got, ok := New().Choose(nil); ok {
-		t.Errorf(`Choose(nil): got %q, want ""`, got)
+		t.Errorf(`Choose(nil): got %v, want ""`, got)
 	}
 
 	// Test mutating selection.
-	if got, ok := s.Pop(func(s string) bool { return strings.HasPrefix(s, "c") }); !ok {
-		t.Error(`Pop("c*"): missing element`)
+	if got, ok := s.Pop(func(s string) bool {
+		return s == testValues[1]
+	}); !ok {
+		t.Error("Pop(1): missing element")
 	} else {
-		t.Logf(`Found %q for prefix "c"`, got)
+		t.Logf("Found %v for element 1", got)
 	}
 	// A popped item is removed from the set.
-	if len(s) != count-1 {
-		t.Errorf("Length after pop: got %d, want %d", len(s), count-1)
+	if len(s) != 4 {
+		t.Errorf("Length after pop: got %d, want %d", len(s), 4)
 	}
 	// Pop of a nonexistent key returns not-found.
 	if got, ok := s.Pop(func(string) bool { return false }); ok {
-		t.Errorf(`Pop(impossible): got %q, want ""`, got)
+		t.Errorf(`Pop(impossible): got %v, want ""`, got)
 	}
 	// Pop from an empty set returns not-found.
 	if got, ok := New().Pop(nil); ok {
-		t.Errorf(`Pop(nil) on ø: got %q, want ""`, got)
+		t.Errorf(`Pop(nil) on empty: got %v, want ""`, got)
 	}
 }
 
 func TestContainsAny(t *testing.T) {
-	set := New("2", "3", "5", "7", "11", "13")
+	set := New(testValues[2:]...)
 	tests := []struct {
 		keys []string
 		want bool
 	}{
 		{nil, false},
 		{[]string{}, false},
-		{[]string{"1", "4"}, false},
-		{[]string{""}, false},
-		{[]string{"7"}, true},
-		{[]string{"8", "3", "1", "9"}, true},
-		{[]string{"q", "r", "13", "s"}, true},
+		{testKeys(0), false},
+		{testKeys(1), false},
+		{testKeys(0, 1), false},
+		{testKeys(7), true},
+		{testKeys(8, 3, 4, 9), true},
+		{testKeys(0, 7, 1, 0), true},
 	}
 	t.Logf("Test set: %v", set)
 	for _, test := range tests {
 		got := set.ContainsAny(test.keys...)
 		if got != test.want {
-			t.Errorf("ContainsAny(%+q): got %v, want %v", test.keys, got, test.want)
+			t.Errorf("ContainsAny(%+v): got %v, want %v", test.keys, got, test.want)
 		}
 	}
 }
 
 func TestContainsAll(t *testing.T) {
-	set := New("a", "e", "i", "y")
+	//set := New("a", "e", "i", "y")
+	set := New(testValues[2:]...)
 	tests := []struct {
 		keys []string
 		want bool
 	}{
 		{nil, true},
 		{[]string{}, true},
-		{[]string{"a", "e", "i"}, true},
-		{[]string{"a", "e", "i", "o"}, false},
-		{[]string{"b"}, false},
-		{[]string{"a", "a", "a"}, true},
+		{testKeys(2, 4, 6), true},
+		{testKeys(1, 3, 5, 7), false},
+		{testKeys(0), false},
+		{testKeys(5, 5, 5), true},
 	}
 	t.Logf("Test set: %v", set)
 	for _, test := range tests {
 		got := set.Contains(test.keys...)
 		if got != test.want {
-			t.Errorf("Contains(%+q): got %v, want %v", test.keys, got, test.want)
+			t.Errorf("Contains(%+v): got %v, want %v", test.keys, got, test.want)
 		}
 	}
 }
 
 func TestIsSubset(t *testing.T) {
 	var empty Set
-	key := New("some", "of", "what", "a", "fool", "thinks", "often", "remains")
+	key := testSet(0, 2, 6, 7, 9)
 	for _, test := range [][]string{
-		{}, {"of", "a"}, {"some", "what", "fool"},
+		{}, testKeys(2, 6), testKeys(0, 7, 9),
 	} {
 		probe := New(test...)
 		if !probe.IsSubset(key) {
-			t.Errorf("IsSubset %+q ⊂ %+q is false", probe, key)
+			t.Errorf("IsSubset %+v ⊂ %+v is false", probe, key)
 		}
 		if !empty.IsSubset(probe) { // ø is a subset of everything, including itself.
-			t.Errorf("IsSubset ø ⊂ %+q is false", probe)
+			t.Errorf("IsSubset ø ⊂ %+v is false", probe)
 		}
 	}
 }
@@ -175,32 +196,32 @@ func TestNotSubset(t *testing.T) {
 	tests := []struct {
 		probe, key Set
 	}{
-		{New("a"), New()},
-		{New("a"), New("b")},
-		{New("a", "b"), New("b")},
-		{New("a", "c", "b"), New("a", "c", "d")},
+		{testSet(0), New()},
+		{testSet(0), testSet(1)},
+		{testSet(0, 1), testSet(1)},
+		{testSet(0, 2, 1), testSet(0, 2, 3)},
 	}
 	for _, test := range tests {
 		if test.probe.IsSubset(test.key) {
-			t.Errorf("IsSubset %v ⊂ %v is true", test.probe, test.key)
+			t.Errorf("IsSubset %+v ⊂ %+v is true", test.probe, test.key)
 		}
 	}
 }
 
 func TestEquality(t *testing.T) {
-	nat := New("1", "2", "3", "4", "5")
-	odd := New("1", "3", "5")
+	nat := New(testValues[:]...)
+	odd := testSet(1, 3, 4, 5, 8)
 	tests := []struct {
 		left, right Set
 		eq          bool
 	}{
 		{nil, nil, true},
-		{nat, nat, true},           // Equality with the same value
-		{New("a"), New("a"), true}, // Equality with Different values
-		{New("a"), nil, false},
+		{nat, nat, true},               // Equality with the same value
+		{testSet(0), testSet(0), true}, // Equality with Different values
+		{testSet(0), nil, false},
 		{nat, odd, false},
-		{nil, New("a"), false},
-		{New("a"), New("b"), false},
+		{nil, testSet(0), false},
+		{testSet(0), testSet(1), false},
 
 		// Various set operations...
 		{nat.Intersect(odd), odd, true},
@@ -216,7 +237,7 @@ func TestEquality(t *testing.T) {
 		{odd.Diff(nat), nil, true},
 		{nil, odd.Diff(nat), true},
 
-		{New("a", "b", "c").Diff(New("b", "m", "x")), New("c").Union(New("a")), true},
+		{testSet(0, 1, 2).Diff(testSet(2, 5, 6)), testSet(1).Union(testSet(0)), true},
 	}
 	for _, test := range tests {
 		if got := test.left.Equals(test.right); got != test.eq {
@@ -226,29 +247,27 @@ func TestEquality(t *testing.T) {
 }
 
 func TestUnion(t *testing.T) {
-	vowels := New("e", "o", "i", "a", "u")
-	vkeys := []string{"a", "e", "i", "o", "u"}
-
-	consonants := New("h", "f", "b", "d", "g", "c")
+	vkeys := testKeys(0, 4)
+	vowels := testSet(4, 0)
+	consonants := testSet(1, 2, 3, 5, 6, 7, 8, 9)
 
 	if got := vowels.Union(nil).Elements(); !reflect.DeepEqual(got, vkeys) {
-		t.Errorf("Vowels ∪ ø: got %+q, want %+q", got, vkeys)
+		t.Errorf("Vowels ∪ ø: got %+v, want %+v", got, vkeys)
 	}
 	if got := New().Union(vowels).Elements(); !reflect.DeepEqual(got, vkeys) {
-		t.Errorf("ø ∪ Vowels: got %+q, want %+q", got, vkeys)
+		t.Errorf("ø ∪ Vowels: got %+v, want %+v", got, vkeys)
 	}
 
-	want := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "o", "u"}
-	if got := vowels.Union(consonants).Elements(); !reflect.DeepEqual(got, want) {
-		t.Errorf("Vowels ∪ Consonants: got %+q, want %+q", got, want)
+	if got, want := vowels.Union(consonants).Elements(), testValues[:]; !reflect.DeepEqual(got, want) {
+		t.Errorf("Vowels ∪ Consonants: got %+v, want %+v", got, want)
 	}
 }
 
 func TestIntersect(t *testing.T) {
 	empty := New()
-	nat := New("0", "1", "2", "3", "4", "5", "6", "7")
-	odd := New("1", "a", "3", "5", "7", "p", "q")
-	prime := New("2", "m", "3", "d", "x", "5", "7", "!")
+	nat := New(testValues[:]...)
+	odd := testSet(1, 3, 5, 7, 9)
+	prime := testSet(2, 3, 5, 7)
 
 	tests := []struct {
 		left, right Set
@@ -257,27 +276,27 @@ func TestIntersect(t *testing.T) {
 		{empty, empty, nil},
 		{empty, nat, nil},
 		{nat, empty, nil},
-		{nat, nat, []string{"0", "1", "2", "3", "4", "5", "6", "7"}},
-		{nat, odd, []string{"1", "3", "5", "7"}},
-		{odd, nat, []string{"1", "3", "5", "7"}},
-		{odd, prime, []string{"3", "5", "7"}},
-		{prime, nat, []string{"2", "3", "5", "7"}},
+		{nat, nat, testValues[:]},
+		{nat, odd, testKeys(1, 3, 5, 7, 9)},
+		{odd, nat, testKeys(1, 3, 5, 7, 9)},
+		{odd, prime, testKeys(3, 5, 7)},
+		{prime, nat, testKeys(2, 3, 5, 7)},
 	}
 	for _, test := range tests {
 		got := test.left.Intersect(test.right).Elements()
 		if !reflect.DeepEqual(got, test.want) {
-			t.Errorf("%v ∩ %v: got %+q, want %+q", test.left, test.right, got, test.want)
+			t.Errorf("%v ∩ %v: got %+v, want %+v", test.left, test.right, got, test.want)
 		} else if want, ok := len(test.want) != 0, test.left.Intersects(test.right); ok != want {
-			t.Errorf("%v.Intersects(%v): got %v, want %v", test.left, test.right, ok, want)
+			t.Errorf("%+v.Intersects(%+v): got %v, want %v", test.left, test.right, ok, want)
 		}
 	}
 }
 
 func TestDiff(t *testing.T) {
 	empty := New()
-	nat := New("0", "1", "2", "3", "4", "5", "6", "7")
-	odd := New("1", "a", "3", "5", "7", "p", "q")
-	prime := New("2", "m", "3", "d", "x", "5", "7", "!")
+	nat := New(testValues[:]...)
+	odd := testSet(1, 3, 5, 7, 9)
+	prime := testSet(2, 3, 5, 7)
 
 	tests := []struct {
 		left, right Set
@@ -285,12 +304,12 @@ func TestDiff(t *testing.T) {
 	}{
 		{empty, empty, nil},
 		{empty, nat, nil},
-		{nat, empty, []string{"0", "1", "2", "3", "4", "5", "6", "7"}},
+		{nat, empty, testValues[:]},
 		{nat, nat, nil},
-		{nat, odd, []string{"0", "2", "4", "6"}},
-		{odd, nat, []string{"a", "p", "q"}},
-		{odd, prime, []string{"1", "a", "p", "q"}},
-		{prime, nat, []string{"!", "d", "m", "x"}},
+		{nat, odd, testKeys(0, 2, 4, 6, 8)},
+		{odd, nat, nil},
+		{odd, prime, testKeys(1, 9)},
+		{prime, nat, nil},
 	}
 	for _, test := range tests {
 		got := test.left.Diff(test.right).Elements()
@@ -301,9 +320,9 @@ func TestDiff(t *testing.T) {
 }
 
 func TestSymDiff(t *testing.T) {
-	a := New("a", "b", "c", "d", "e")
-	b := New("a", "e", "i", "o", "u")
-	c := New("d", "e", "f", "i")
+	a := testSet(0, 1, 2, 3, 4)
+	b := testSet(0, 4, 5, 6, 7)
+	c := testSet(3, 4, 8, 9)
 	empty := New()
 
 	tests := []struct {
@@ -314,16 +333,16 @@ func TestSymDiff(t *testing.T) {
 		{empty, a, a.Elements()},
 		{b, empty, b.Elements()},
 		{a, a, nil},
-		{a, b, []string{"b", "c", "d", "i", "o", "u"}},
-		{b, a, []string{"b", "c", "d", "i", "o", "u"}},
-		{a, c, []string{"a", "b", "c", "f", "i"}},
-		{c, a, []string{"a", "b", "c", "f", "i"}},
-		{c, b, []string{"a", "d", "f", "o", "u"}},
+		{a, b, testKeys(1, 2, 3, 5, 6, 7)},
+		{b, a, testKeys(1, 2, 3, 5, 6, 7)},
+		{a, c, testKeys(0, 1, 2, 8, 9)},
+		{c, a, testKeys(0, 1, 2, 8, 9)},
+		{c, b, testKeys(0, 3, 5, 6, 7, 8, 9)},
 	}
 	for _, test := range tests {
 		got := test.left.SymDiff(test.right).Elements()
 		if !reflect.DeepEqual(got, test.want) {
-			t.Errorf("%v ∆ %v: got %+q, want %+q", test.left, test.right, got, test.want)
+			t.Errorf("%v ∆ %v: got %+v, want %+v", test.left, test.right, got, test.want)
 		}
 	}
 }
@@ -335,14 +354,14 @@ func TestUpdate(t *testing.T) {
 		changed        bool
 	}{
 		{nil, nil, nil, false},
-		{nil, New("a"), []string{"a"}, true},
-		{New("pdq"), nil, []string{"pdq"}, false},
-		{New("a", "b"), New("c", "c", "b"), []string{"a", "b", "c"}, true},
+		{nil, testSet(0), testKeys(0), true},
+		{testSet(1), nil, testKeys(1), false},
+		{testSet(2, 3), testSet(4, 4, 3), testKeys(2, 3, 4), true},
 	}
 	for _, test := range tests {
 		ok := test.before.Update(test.update)
 		if got := test.before.Elements(); !reflect.DeepEqual(got, test.want) {
-			t.Errorf("Update %v: got %+q, want %+q", test.before, got, test.want)
+			t.Errorf("Update %v: got %+v, want %+q", test.before, got, test.want)
 		}
 		if ok != test.changed {
 			t.Errorf("Update %v reported change=%v, want %v", test.before, ok, test.changed)
@@ -357,14 +376,14 @@ func TestAdd(t *testing.T) {
 		changed      bool
 	}{
 		{nil, nil, nil, false},
-		{nil, []string{"a"}, []string{"a"}, true},
-		{New("pdq"), nil, []string{"pdq"}, false},
-		{New("a", "b"), []string{"c", "c", "b"}, []string{"a", "b", "c"}, true},
+		{nil, testKeys(0), testKeys(0), true},
+		{testSet(1), nil, testKeys(1), false},
+		{testSet(0, 1), testKeys(2, 2, 1), testKeys(0, 1, 2), true},
 	}
 	for _, test := range tests {
 		ok := test.before.Add(test.update...)
 		if got := test.before.Elements(); !reflect.DeepEqual(got, test.want) {
-			t.Errorf("Add %v: got %+q, want %+q", test.before, got, test.want)
+			t.Errorf("Add %v: got %+v, want %+v", test.before, got, test.want)
 		}
 		if ok != test.changed {
 			t.Errorf("Add %v reported change=%v, want %v", test.before, ok, test.changed)
@@ -379,15 +398,15 @@ func TestRemove(t *testing.T) {
 		changed        bool
 	}{
 		{nil, nil, nil, false},
-		{nil, New("a"), nil, false},
-		{New("pdq"), nil, []string{"pdq"}, false},
-		{New("a", "b"), New("c", "c", "b"), []string{"a"}, true},
-		{New("a", "b", "c"), New("d", "e"), []string{"a", "b", "c"}, false},
+		{nil, testSet(0), nil, false},
+		{testSet(5), nil, testKeys(5), false},
+		{testSet(3, 9), testSet(5, 1, 9), testKeys(3), true},
+		{testSet(0, 1, 2), testSet(4, 6), testKeys(0, 1, 2), false},
 	}
 	for _, test := range tests {
 		ok := test.before.Remove(test.update)
 		if got := test.before.Elements(); !reflect.DeepEqual(got, test.want) {
-			t.Errorf("Remove %v: got %+q, want %+q", test.before, got, test.want)
+			t.Errorf("Remove %v: got %+v, want %+v", test.before, got, test.want)
 		}
 		if ok != test.changed {
 			t.Errorf("Remove %v reported change=%v, want %v", test.before, ok, test.changed)
@@ -402,15 +421,15 @@ func TestDiscard(t *testing.T) {
 		changed      bool
 	}{
 		{nil, nil, nil, false},
-		{nil, []string{"a"}, nil, false},
-		{New("pdq"), nil, []string{"pdq"}, false},
-		{New("a", "b"), []string{"c", "c", "b"}, []string{"a"}, true},
-		{New("a", "b", "c"), []string{"d", "e"}, []string{"a", "b", "c"}, false},
+		{nil, testKeys(0), nil, false},
+		{testSet(1), nil, testKeys(1), false},
+		{testSet(0, 1), testKeys(2, 2, 1), testKeys(0), true},
+		{testSet(0, 1, 2), testKeys(3, 4), testKeys(0, 1, 2), false},
 	}
 	for _, test := range tests {
 		ok := test.before.Discard(test.update...)
 		if got := test.before.Elements(); !reflect.DeepEqual(got, test.want) {
-			t.Errorf("Discard %v: got %+q, want %+q", test.before, got, test.want)
+			t.Errorf("Discard %v: got %+v, want %+v", test.before, got, test.want)
 		}
 		if ok != test.changed {
 			t.Errorf("Discard %v reported change=%v, want %v", test.before, ok, test.changed)
@@ -419,23 +438,26 @@ func TestDiscard(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-	in := New("", "w", "x", "y")
+	in := New(testValues[:]...)
+	got := make([]string, len(testValues))
 	out := in.Map(func(s string) string {
-		return "-" + s + "-"
+		if p := keyPos(s); p < 0 {
+			t.Errorf("Unknown input key %v", s)
+		} else {
+			got[p] = s
+		}
+		return s
 	})
-	for key := range out {
-		want := strings.Trim(key, "-")
-		if !strings.HasPrefix(key, "-") || !strings.HasPrefix(key, "-") {
-			t.Errorf("Mapped key has the wrong form: %q", key)
-		}
-		if !in.ContainsAny(want) {
-			t.Errorf("Mapped key %q is missing its antecedent %q", key, want)
-		}
+	if !reflect.DeepEqual(got, testValues[:]) {
+		t.Errorf("Incomplete mapping:\n got %+v\nwant %+v", got, testValues)
+	}
+	if !out.Equals(in) {
+		t.Errorf("Incorrect mapping:\n got %v\nwant %v", out, in)
 	}
 }
 
 func TestEach(t *testing.T) {
-	in := New("alice", "basil", "clara", "desmond", "ernie")
+	in := New(testValues[:]...)
 	saw := make(map[string]int)
 	in.Each(func(name string) {
 		saw[name]++
@@ -453,12 +475,13 @@ func TestEach(t *testing.T) {
 }
 
 func TestSelection(t *testing.T) {
-	in := New("ant", "bee", "cat", "dog", "aardvark", "apatasaurus", "emu")
-	want := New("bee", "cat", "dog", "emu")
+	in := New(testValues[:]...)
+	want := testSet(0, 2, 4, 6, 8)
 	if got := in.Select(func(s string) bool {
-		return !strings.HasPrefix(s, "a")
+		pos := keyPos(s)
+		return pos >= 0 && pos%2 == 0
 	}); !got.Equals(want) {
-		t.Errorf(`%v.Select("a*"): got %v, want %v`, in, got, want)
+		t.Errorf("%v.Select(evens): got %v, want %v", in, got, want)
 	}
 	if got := New().Select(func(string) bool { return true }); !got.Empty() {
 		t.Errorf("%v.Select(true): got %v, want empty", New(), got)
@@ -469,37 +492,31 @@ func TestSelection(t *testing.T) {
 }
 
 func TestPartition(t *testing.T) {
-	in := New("a", "be", "cat", "dirt", "ennui", "faiths", "garbage", "horseman")
+	in := New(testValues[:]...)
 	tests := []struct {
 		in, left, right Set
 		f               func(string) bool
 		desc            string
 	}{
-		{New("a", "b"), New("a", "b"), nil,
+		{testSet(0, 1), testSet(0, 1), nil,
 			func(string) bool { return true },
 			"all true",
 		},
-		{New("a", "b"), nil, New("a", "b"),
+		{testSet(0, 1), nil, testSet(0, 1),
 			func(string) bool { return false },
 			"all false",
 		},
 		{in,
-			New("a", "be", "cat", "dirt", "ennui"),
-			New("faiths", "garbage", "horseman"),
-			func(s string) bool { return len(s) < 6 },
-			"len(s) < 6",
+			testSet(0, 1, 2, 3, 4),
+			testSet(5, 6, 7, 8, 9),
+			func(s string) bool { return keyPos(s) < 5 },
+			"pos(s) < 5",
 		},
 		{in,
-			New("a", "cat", "ennui", "garbage"),     // odd
-			New("be", "dirt", "faiths", "horseman"), // even
-			func(s string) bool { return len(s)%2 == 1 },
+			testSet(1, 3, 5, 7, 9), // odd
+			testSet(0, 2, 4, 6, 8), // even
+			func(s string) bool { return keyPos(s)%2 == 1 },
 			"odd/even",
-		},
-		{New(":x", ":y", "a", "z", ":m", "p"),
-			New(":m", ":x", ":y"),
-			New("a", "p", "z"),
-			func(s string) bool { return strings.HasPrefix(s, ":") },
-			"keywords",
 		},
 	}
 	for _, test := range tests {
@@ -514,36 +531,25 @@ func TestPartition(t *testing.T) {
 	}
 }
 
-func TestCount(t *testing.T) {
-	in := New("three", "great", "apes", "ate", "moldy", "bananas", "in", "kansas")
-	t.Logf("Input set: %s", in)
-	if got, want := in.Count(func(s string) bool { return s[0] == 'a' }), 2; got != want {
-		t.Errorf("Count(s[0]=='a'): got %d, want %d", got, want)
-	}
-	if got, want := in.Count(func(s string) bool { return len(s) < 5 }), 3; got != want {
-		t.Errorf("Count(len(s) < 5): got %d, want %d", got, want)
-	}
-}
-
 func TestIndex(t *testing.T) {
 	tests := []struct {
 		needle string
 		keys   []string
 		want   int
 	}{
-		{"", nil, -1},
-		{"a", nil, -1},
-		{"c", []string{"a", "b"}, -1},
-		{"a", []string{"a", "b"}, 0},
-		{"b", []string{"a", "b"}, 1},
-		{"c", []string{"a", "c", "b", "c"}, 1},
-		{"q", []string{"a", "c", "b", "q", ""}, 3},
-		{"", []string{"a", "c", "", "q", ""}, 2},
+		{testValues[0], nil, -1},
+		{testValues[1], []string{}, -1},
+		{testValues[2], testKeys(0, 1), -1},
+		{testValues[0], testKeys(0, 1), 0},
+		{testValues[1], testKeys(0, 1), 1},
+		{testValues[2], testKeys(0, 2, 1, 2), 1},
+		{testValues[9], testKeys(0, 2, 1, 9, 6), 3},
+		{testValues[4], testKeys(0, 2, 4, 9, 4), 2},
 	}
 	for _, test := range tests {
 		got := Index(test.needle, test.keys)
 		if got != test.want {
-			t.Errorf("Index(%q, %q): got %d, want %d", test.needle, test.keys, got, test.want)
+			t.Errorf("Index(%+v, %+v): got %d, want %d", test.needle, test.keys, got, test.want)
 		}
 	}
 }
@@ -553,9 +559,10 @@ type keyer []string
 func (k keyer) Keys() []string {
 	p := make([]string, len(k))
 	copy(p, k)
-	sort.Strings(p)
 	return p
 }
+
+type uniq int
 
 func TestFromValues(t *testing.T) {
 	tests := []struct {
@@ -564,10 +571,10 @@ func TestFromValues(t *testing.T) {
 	}{
 		{nil, nil},
 		{map[float64]string{}, nil},
-		{map[int]string{1: "one", 2: "two", 3: "two"}, []string{"one", "two"}},
-		{map[string]string{"foo": "bar", "baz": "bar"}, []string{"bar"}},
-		{map[int]int{1: 2, 3: 4, 5: 6}, nil},
-		{map[*int]string{nil: "blah"}, []string{"blah"}},
+		{map[int]string{1: testValues[1], 2: testValues[2], 3: testValues[2]}, testKeys(1, 2)},
+		{map[string]string{"foo": testValues[4], "baz": testValues[4]}, testKeys(4)},
+		{map[int]uniq{1: uniq(2), 3: uniq(4), 5: uniq(6)}, nil},
+		{map[*int]string{nil: testValues[0]}, testKeys(0)},
 	}
 	for _, test := range tests {
 		got := FromValues(test.input)
@@ -588,12 +595,12 @@ func TestFromKeys(t *testing.T) {
 		{nil, nil},                  // empty
 		{[]string{}, nil},           // empty
 		{map[string]float64{}, nil}, // empty
-		{"foo", New("foo")},
-		{[]string{"foo", "bar", "foo", "foo"}, New("foo", "bar")},
-		{map[string]int{"one": 1, "two": 2}, New("one", "two")},
-		{keyer{"alpha", "charlie", "echo"}, New("alpha", "charlie", "echo")},
-		{New("p", "d", "q"), New("p", "d", "q")},
-		{map[string]struct{}{"fizz": {}, "buzz": {}}, New("fizz", "buzz")},
+		{testValues[0], testSet(0)},
+		{testKeys(0, 1, 0, 0), testSet(0, 1)},
+		{map[string]int{testValues[0]: 1, testValues[1]: 2}, testSet(0, 1)},
+		{keyer(testValues[:3]), testSet(0, 1, 2)},
+		{testSet(4, 7, 8), testSet(4, 7, 8)},
+		{map[string]struct{}{testValues[2]: {}, testValues[7]: {}}, testSet(2, 7)},
 	}
 	for _, test := range tests {
 		got := FromKeys(test.input)
@@ -609,37 +616,37 @@ func TestContainsFunc(t *testing.T) {
 		needle string
 		want   bool
 	}{
-		{[]string(nil), "x", false},
-		{[]string{}, "x", false},
-		{[]string{"x"}, "x", true},
-		{[]string{"y"}, "x", false},
-		{[]string{"a", "b", "x", "c"}, "x", true},
+		{[]string(nil), testValues[0], false},
+		{[]string{}, testValues[0], false},
+		{testKeys(0), testValues[0], true},
+		{testKeys(1), testValues[0], false},
+		{testKeys(0, 1, 9, 2), testValues[0], true},
 
-		{map[string]int(nil), "q", false},
-		{map[string]int{}, "q", false},
-		{map[string]int{"q": 1}, "q", true},
-		{map[string]int{"v": 3}, "q", false},
-		{map[string]float32{"q": 1, "r": 2}, "q", true},
-		{map[string]float32{"s": 0, "t": 1, "f": 2, "u": 3}, "q", false},
+		{map[string]int(nil), testValues[2], false},
+		{map[string]int{}, testValues[2], false},
+		{map[string]int{testValues[2]: 1}, testValues[2], true},
+		{map[string]int{testValues[3]: 3}, testValues[2], false},
+		{map[string]float32{testValues[2]: 1, testValues[4]: 2}, testValues[2], true},
+		{map[string]float32{testValues[5]: 0, testValues[6]: 1, testValues[7]: 2, testValues[8]: 3}, testValues[2], false},
 
-		{Set(nil), "m", false},
-		{New(), "m", false},
-		{New("m"), "m", true},
-		{New("p"), "m", false},
-		{New("a", "b"), "m", false},
-		{New("a", "m", "b"), "m", true},
+		{Set(nil), testValues[3], false},
+		{New(), testValues[3], false},
+		{New(testValues[3]), testValues[3], true},
+		{New(testValues[5]), testValues[3], false},
+		{testSet(0, 1), testValues[3], false},
+		{testSet(0, 3, 1), testValues[3], true},
 
-		{keyer(nil), "*", false},
-		{keyer{}, "*", false},
-		{keyer{"*"}, "*", true},
-		{keyer{"?"}, "*", false},
-		{keyer{"a", "s", "*"}, "*", true},
-		{keyer{"a", "s", "k"}, "*", false},
+		{keyer(nil), testValues[9], false},
+		{keyer{}, testValues[9], false},
+		{keyer{testValues[9]}, testValues[9], true},
+		{keyer{testValues[0]}, testValues[9], false},
+		{keyer(testKeys(0, 6, 9)), testValues[9], true},
+		{keyer(testKeys(0, 6, 7)), testValues[9], false},
 	}
 	for _, test := range tests {
 		got := Contains(test.input, test.needle)
 		if got != test.want {
-			t.Errorf("Contains(%v, %q): got %v, want %v", test.input, test.needle, got, test.want)
+			t.Errorf("Contains(%+v, %v): got %v, want %v", test.input, test.needle, got, test.want)
 		}
 	}
 }
