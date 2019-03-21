@@ -8,8 +8,16 @@ import (
 // testValues contains an ordered sequence of ten set keys used for testing.
 // The order of the keys must reflect the expected order of key listings.
 var testValues = [10]string{
-	"eight", "five", "four", "nine", "one",
-	"seven", "six", "ten", "three", "two",
+	"eight",
+	"five",
+	"four",
+	"nine",
+	"one",
+	"seven",
+	"six",
+	"ten",
+	"three",
+	"two",
 }
 
 func testKeys(ixs ...int) (keys []string) {
@@ -80,7 +88,7 @@ func TestUniqueness(t *testing.T) {
 
 	// Keys should come out sorted.
 	if got := s.Elements(); !reflect.DeepEqual(got, testValues[:]) {
-		t.Errorf("s.Elements(): got %+q, want %+q", got, testValues)
+		t.Errorf("s.Elements():\n got %+v,\nwant %+v", got, testValues)
 	}
 }
 
@@ -464,12 +472,12 @@ func TestEach(t *testing.T) {
 	})
 	for want := range in {
 		if saw[want] != 1 {
-			t.Errorf("Saw %q %d times, wanted 1", want, saw[want])
+			t.Errorf("Saw [%v] %d times, wanted 1", want, saw[want])
 		}
 	}
 	for got, n := range saw {
 		if _, ok := in[got]; !ok {
-			t.Errorf("Saw %q %d times, wanted 0", got, n)
+			t.Errorf("Saw [%v] %d times, wanted 0", got, n)
 		}
 	}
 }
@@ -591,7 +599,7 @@ func TestFromKeys(t *testing.T) {
 		want  Set
 	}{
 		{3.5, nil},                  // unkeyable type
-		{map[int]int{1: 1}, nil},    // unkeyable type
+		{map[uniq]uniq{1: 1}, nil},  // unkeyable type
 		{nil, nil},                  // empty
 		{[]string{}, nil},           // empty
 		{map[string]float64{}, nil}, // empty
@@ -605,7 +613,7 @@ func TestFromKeys(t *testing.T) {
 	for _, test := range tests {
 		got := FromKeys(test.input)
 		if !got.Equals(test.want) {
-			t.Errorf("MapKeys %v: got %v, want %v", test.input, got, test.want)
+			t.Errorf("FromKeys %v: got %v, want %v", test.input, got, test.want)
 		}
 	}
 }
