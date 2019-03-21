@@ -5,5 +5,9 @@
   "zero": "\"\"",
   "toString": "return strconv.Quote(x)",
   "imports": ["strconv"],
-  "transforms": true
+  "transforms": true,
+  "testValues": [
+     "\"eight\"", "\"five\"", "\"four\"", "\"nine\"", "\"one\"",
+     "\"seven\"", "\"six\"", "\"ten\"", "\"three\"", "\"two\""
+  ]
 }
