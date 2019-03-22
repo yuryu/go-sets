@@ -3,7 +3,7 @@
   "package": "nodeset",
   "type": "ast.Node",
   "zero": "nil",
-  "less": "if x.Pos() == y.Pos() { return x.End() > y.End() } else { return x.Pos() < y.Pos() }",
+  "less": "if x.Pos() == y.Pos() { return x.End() > y.End() }\nreturn x.Pos() < y.Pos()",
   "imports": ["go/ast"],
   "testImports": ["go/ast"],
   "transforms": true,
