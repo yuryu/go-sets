@@ -582,7 +582,8 @@ func (s Set) Partition(f func({{.Type}}) bool) (yes, no Set) {
 
 // Choose returns an element of s for which f returns true, if one exists.  The
 // second result reports whether such an element was found.
-// If f == nil, chooses an arbitrary element of s.
+// If f == nil, chooses an arbitrary element of s. The element chosen is not
+// guaranteed to be the same across repeated calls.
 func (s Set) Choose(f func({{.Type}}) bool) ({{.Type}}, bool) {
 	if f == nil {
 		for k := range s {
