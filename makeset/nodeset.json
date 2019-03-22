@@ -5,5 +5,18 @@
   "zero": "nil",
   "less": "if x.Pos() == y.Pos() { return x.End() > y.End() } else { return x.Pos() < y.Pos() }",
   "imports": ["go/ast"],
-  "transforms": false
+  "testImports": ["go/ast"],
+  "transforms": true,
+  "testValues": [
+      "&ast.Ident{NamePos: 1}",
+      "&ast.Ident{NamePos: 3}",
+      "&ast.Ident{NamePos: 5}",
+      "&ast.Ident{NamePos: 9}",
+      "&ast.Ident{NamePos: 10}",
+      "&ast.Ident{NamePos: 12}",
+      "&ast.Ident{NamePos: 14}",
+      "&ast.Ident{NamePos: 17}",
+      "&ast.Ident{NamePos: 19}",
+      "&ast.Ident{NamePos: 25}"
+  ]
 }
