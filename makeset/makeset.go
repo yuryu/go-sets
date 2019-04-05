@@ -525,6 +525,16 @@ func FromKeys(v interface{}) Set {
 	return result
 }
 
+// FromIndexed returns a Set constructed from the values of f(i) for
+// each 0 ≤ i < n. If n ≤ 0 the result is nil.
+func FromIndexed(n int, f func(int) {{.Type}}) Set {
+	var set Set
+	for i := 0; i < n; i++ {
+		set.Add(f(i))
+	}
+	return set
+}
+
 // FromValues returns a Set of the values from v, which has type map[T]{{.Type}}.
 // Returns the empty set if v does not have a type of this form.
 func FromValues(v interface{}) Set {
@@ -1278,6 +1288,27 @@ func TestContainsFunc(t *testing.T) {
 		got := Contains(test.input, test.needle)
 		if got != test.want {
 			t.Errorf("Contains(%+v, %v): got %v, want %v", test.input, test.needle, got, test.want)
+		}
+	}
+}
+
+func TestFromIndexed(t *testing.T) {
+	tests := []struct {
+		input []int
+		want  Set
+	}{
+		{nil, nil},
+		{[]int{}, nil},
+		{[]int{0}, testSet(0)},
+		{[]int{1, 8, 2, 9}, testSet(1, 2, 8, 9)},
+		{[]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, New(testValues[:]...)},
+	}
+	for _, test := range tests {
+		got := FromIndexed(len(test.input), func(i int) {{.Type}} {
+			return testValues[test.input[i]]
+		})
+		if !got.Equals(test.want) {
+			t.Errorf("FromIndexed(%d, <...>): got %v, want %v", len(test.input), got, test.want)
 		}
 	}
 }

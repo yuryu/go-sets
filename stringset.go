@@ -340,6 +340,16 @@ func FromKeys(v interface{}) Set {
 	return result
 }
 
+// FromIndexed returns a Set constructed from the values of f(i) for
+// each 0 ≤ i < n. If n ≤ 0 the result is nil.
+func FromIndexed(n int, f func(int) string) Set {
+	var set Set
+	for i := 0; i < n; i++ {
+		set.Add(f(i))
+	}
+	return set
+}
+
 // FromValues returns a Set of the values from v, which has type map[T]string.
 // Returns the empty set if v does not have a type of this form.
 func FromValues(v interface{}) Set {

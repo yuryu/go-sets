@@ -658,3 +658,24 @@ func TestContainsFunc(t *testing.T) {
 		}
 	}
 }
+
+func TestFromIndexed(t *testing.T) {
+	tests := []struct {
+		input []int
+		want  Set
+	}{
+		{nil, nil},
+		{[]int{}, nil},
+		{[]int{0}, testSet(0)},
+		{[]int{1, 8, 2, 9}, testSet(1, 2, 8, 9)},
+		{[]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, New(testValues[:]...)},
+	}
+	for _, test := range tests {
+		got := FromIndexed(len(test.input), func(i int) string {
+			return testValues[test.input[i]]
+		})
+		if !got.Equals(test.want) {
+			t.Errorf("FromIndexed(%d, <...>): got %v, want %v", len(test.input), got, test.want)
+		}
+	}
+}
