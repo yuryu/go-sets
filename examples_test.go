@@ -111,6 +111,23 @@ func ExampleFromKeys() {
 	// Output: {"one", "three", "two"}
 }
 
+func ExampleFromIndexed() {
+	type T struct {
+		Event       string
+		Probability float64
+	}
+	events := []T{
+		{"heads", 0.625},
+		{"tails", 0.370},
+		{"edge", 0.005},
+	}
+	s := FromIndexed(len(events), func(i int) string {
+		return events[i].Event
+	})
+	fmt.Println(s)
+	// Output: {"edge", "heads", "tails"}
+}
+
 func ExampleFromValues() {
 	s := FromValues(map[int]string{
 		1: "red",
