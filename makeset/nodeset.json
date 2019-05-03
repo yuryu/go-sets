@@ -8,15 +8,15 @@
   "testImports": ["go/ast"],
   "transforms": true,
   "testValues": [
-      "&ast.Ident{NamePos: 1}",
-      "&ast.Ident{NamePos: 3}",
-      "&ast.Ident{NamePos: 5}",
-      "&ast.Ident{NamePos: 9}",
-      "&ast.Ident{NamePos: 10}",
-      "&ast.Ident{NamePos: 12}",
-      "&ast.Ident{NamePos: 14}",
-      "&ast.Ident{NamePos: 17}",
-      "&ast.Ident{NamePos: 19}",
-      "&ast.Ident{NamePos: 25}"
+      "&ast.Ident{Name: \"amy\", NamePos: 1}",
+      "&ast.Ident{Name: \"basil\", NamePos: 3}",
+      "&ast.Ident{Name: \"clara\", NamePos: 5}",
+      "&ast.Ident{Name: \"desmond\", NamePos: 9}",
+      "&ast.Ident{Name: \"ernest\", NamePos: 10}",
+      "&ast.Ident{Name: \"fanny\", NamePos: 12}",
+      "&ast.Ident{Name: \"george\", NamePos: 14}",
+      "&ast.Ident{Name: \"hector\", NamePos: 17}",
+      "&ast.Ident{Name: \"ida\", NamePos: 19}",
+      "&ast.Ident{Name: \"james\", NamePos: 25}"
   ]
 }
