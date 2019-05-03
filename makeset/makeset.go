@@ -176,7 +176,7 @@ func main() {
 
 // mainFile contains the main source for the package, including doc comments.
 const mainFile = `
-// Package {{.Package}} implements a lightweight (finite) set-of-{{.Type}} type
+// Package {{.Package}} implements a lightweight (finite) set of {{.Type}} values
 // based on Go's built-in map.  A Set provides some convenience methods for
 // common set operations.
 //
