@@ -1,4 +1,4 @@
-// Package stringset implements a lightweight (finite) set-of-string type
+// Package stringset implements a lightweight (finite) set of string values
 // based on Go's built-in map.  A Set provides some convenience methods for
 // common set operations.
 //
