@@ -169,6 +169,15 @@ func ExampleFromValues() {
 	// Output: {"blue", "green", "red"}
 }
 
+func ExampleIndex() {
+	s := strings.Fields("full plate and packing steel")
+	fmt.Println(stringset.Index("plate", s))
+	fmt.Println(stringset.Index("spoon", s))
+	// Output:
+	// 1
+	// -1
+}
+
 func ExampleSet_Map() {
 	names := stringset.New("stdio.h", "main.cc", "lib.go", "BUILD", "fixup.py")
 	fmt.Println(names.Map(filepath.Ext))
