@@ -1,6 +1,0 @@
-{
-  "desc": "A set of byte values (for demo purposes; not optimal for real work).",
-  "type": "byte",
-  "zero": "0",
-  "package": "byteset"
-}
