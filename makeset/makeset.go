@@ -1,15 +1,14 @@
 // Program makeset generates source code for a set package.  The type of the
-// elements of the set is determined by a JSON configuration stored either in a
+// elements of the set is determined by a TOML configuration stored either in a
 // file (named by the -config flag) or read from standard input.
 //
 // Usage:
-//   go run makeset.go -output $DIR -config config.json
+//   go run makeset.go -output $DIR -config config.toml
 //
 package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -21,27 +20,29 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+
+	"github.com/BurntSushi/toml"
 )
 
 // A Config describes the nature of the set to be constructed.
 type Config struct {
 	// A human-readable description of the set this config defines.
 	// This is ignored by the code generator, but may serve as documentation.
-	Desc string `json:"desc,omitempty"`
+	Desc string
 
 	// The name of the resulting set package, e.g., "intset" (required).
-	Package string `json:"package"`
+	Package string
 
 	// The name of the type contained in the set, e.g., "int" (required).
-	Type string `json:"type"`
+	Type string
 
 	// The spelling of the zero value for the set type, e.g., "0" (required).
-	Zero string `json:"zero"`
+	Zero string
 
 	// If set, a type definition is added to the package mapping Type to this
 	// structure, e.g., "struct { ... }". You may prefix Decl with "=" to
 	// generate a type alias (this requires Go ≥ 1.9).
-	Decl string `json:"decl,omitempty"`
+	Decl string
 
 	// If set, the body of a function with signature func(x, y Type) bool
 	// reporting whether x is less than y.
@@ -51,23 +52,23 @@ type Config struct {
 	//     return x[1] < y[1]
 	//   }
 	//   return x[0] < y[0]
-	Less string `json:"less,omitempty"`
+	Less string
 
 	// If set, the body of a function with signature func(x Type) string that
 	// converts x to a human-readable string.
 	//
 	// For example:
 	//   return strconv.Itoa(x)
-	ToString string `json:"toString,omitempty"`
+	ToString string
 
 	// If set, additional packages to import in the generated code.
-	Imports []string `json:"imports,omitempty"`
+	Imports []string
 
 	// If set, additional packages to import in the test.
-	TestImports []string `json:"testImports,omitempty"`
+	TestImports []string
 
 	// If true, include transformations, e.g., Map, Partition, Each.
-	Transforms bool `json:"transforms,omitempty"`
+	Transforms bool
 
 	// A list of exactly ten ordered test values used for the construction of
 	// unit tests. If omitted, unit tests are not generated.
@@ -108,7 +109,7 @@ func readConfig(path string) (*Config, error) {
 		return nil, err
 	}
 	var c Config
-	if err := json.Unmarshal(data, &c); err != nil {
+	if err := toml.Unmarshal(data, &c); err != nil {
 		return nil, err
 	}
 
