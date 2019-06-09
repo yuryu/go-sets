@@ -1,51 +1,58 @@
-package stringset
+package stringset_test
 
 import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+
+	"bitbucket.org/creachadair/stringset"
 )
 
 func ExampleSet_Intersect() {
-	fmt.Println(New("one").Intersect(nil))
-	// Output: ø
+	a := stringset.New("one", "two", "three")
+	b := stringset.New("two", "four", "six")
+	fmt.Println(a.Intersect(b))
+	// Output: {"two"}
 }
 
 func ExampleSet_Union() {
-	fmt.Println(New("0", "1", "2").Union(New("x")))
+	s := stringset.New("0", "1", "2").Union(stringset.New("x"))
+	fmt.Println(s)
 	// Output: {"0", "1", "2", "x"}
 }
 
 func ExampleSet_Discard() {
-	nat := New("0", "1", "2", "3", "4")
+	nat := stringset.New("0", "1", "2", "3", "4")
 	ok := nat.Discard("2", "4", "6")
 	fmt.Println(ok, nat)
 	// Output: true {"0", "1", "3"}
 }
 
 func ExampleSet_Add() {
-	one := New("one")
-	one.Add("one", "perfect", "question")
-	fmt.Println(one)
-	// Output: {"one", "perfect", "question"}
+	s := stringset.New("A", "B")
+	s.Add("B", "C", "D")
+	fmt.Println(s)
+	// Output: {"A", "B", "C", "D"}
 }
 
 func ExampleSet_Select() {
 	re := regexp.MustCompile(`[a-z]\d+`)
-	s := New("a", "b15", "c9", "q").Select(re.MatchString)
-	fmt.Println(s.Elements())
-	// Output: [b15 c9]
+	s := stringset.New("a", "b15", "c9", "q").Select(re.MatchString)
+	fmt.Println(s)
+	// Output: {"b15", "c9"}
 }
 
 func ExampleSet_Choose() {
-	s := New("a", "ab", "abc", "abcd")
-	long, ok := s.Choose(func(c string) bool { return len(c) > 3 })
+	s := stringset.New("a", "ab", "abc", "abcd")
+	long, ok := s.Choose(func(c string) bool {
+		return len(c) > 3
+	})
 	fmt.Println(long, ok)
 	// Output: abcd true
 }
 
 func ExampleSet_Contains() {
-	s := New("a", "b", "c", "d", "e")
+	s := stringset.New("a", "b", "c", "d", "e")
 	ae := s.Contains("a", "e")       // all present
 	bdx := s.Contains("b", "d", "x") // x missing
 	fmt.Println(ae, bdx)
@@ -53,7 +60,7 @@ func ExampleSet_Contains() {
 }
 
 func ExampleSet_ContainsAny() {
-	s := New("a", "b", "c")
+	s := stringset.New("a", "b", "c")
 	fm := s.ContainsAny("f", "m")       // all missing
 	bdx := s.ContainsAny("b", "d", "x") // b present
 	fmt.Println(fm, bdx)
@@ -61,15 +68,15 @@ func ExampleSet_ContainsAny() {
 }
 
 func ExampleSet_Diff() {
-	a := New("a", "b", "c")
-	v := New("a", "e", "i")
+	a := stringset.New("a", "b", "c")
+	v := stringset.New("a", "e", "i")
 	fmt.Println(a.Diff(v))
 	// Output: {"b", "c"}
 }
 
 func ExampleSet_Each() {
 	sum := 0
-	New("one", "two", "three").Each(func(s string) {
+	stringset.New("one", "two", "three").Each(func(s string) {
 		sum += len(s)
 	})
 	fmt.Println(sum)
@@ -77,7 +84,7 @@ func ExampleSet_Each() {
 }
 
 func ExampleSet_Pop() {
-	s := New("a", "bc", "def", "ghij")
+	s := stringset.New("a", "bc", "def", "ghij")
 	p, ok := s.Pop(func(s string) bool {
 		return len(s) == 2
 	})
@@ -86,7 +93,7 @@ func ExampleSet_Pop() {
 }
 
 func ExampleSet_Partition() {
-	s := New("aba", "d", "qpc", "ff")
+	s := stringset.New("aba", "d", "qpc", "ff")
 	a, b := s.Partition(func(s string) bool {
 		return s[0] == s[len(s)-1]
 	})
@@ -95,14 +102,14 @@ func ExampleSet_Partition() {
 }
 
 func ExampleSet_SymDiff() {
-	s := New("a", "b", "c")
-	t := New("a", "c", "t")
+	s := stringset.New("a", "b", "c")
+	t := stringset.New("a", "c", "t")
 	fmt.Println(s.SymDiff(t))
 	// Output: {"b", "t"}
 }
 
 func ExampleFromKeys() {
-	s := FromKeys(map[string]int{
+	s := stringset.FromKeys(map[string]int{
 		"one":   1,
 		"two":   2,
 		"three": 3,
@@ -121,7 +128,7 @@ func ExampleFromIndexed() {
 		{"tails", 0.370},
 		{"edge", 0.005},
 	}
-	s := FromIndexed(len(events), func(i int) string {
+	s := stringset.FromIndexed(len(events), func(i int) string {
 		return events[i].Event
 	})
 	fmt.Println(s)
@@ -129,7 +136,7 @@ func ExampleFromIndexed() {
 }
 
 func ExampleFromValues() {
-	s := FromValues(map[int]string{
+	s := stringset.FromValues(map[int]string{
 		1: "red",
 		2: "green",
 		3: "red",
@@ -141,11 +148,8 @@ func ExampleFromValues() {
 }
 
 func ExampleSet_Map() {
-	names := New("stdio.h", "main.cc", "lib.go", "BUILD", "fixup.py")
-	ext := names.Map(filepath.Ext)
-	fmt.Println(ext)
-	fmt.Println("Legacy:", ext.Contains(".h", ".cc"))
+	names := stringset.New("stdio.h", "main.cc", "lib.go", "BUILD", "fixup.py")
+	fmt.Println(names.Map(filepath.Ext))
 	// Output:
 	// {"", ".cc", ".go", ".h", ".py"}
-	// Legacy: true
 }
