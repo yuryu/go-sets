@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"bitbucket.org/creachadair/stringset"
 )
@@ -106,6 +107,27 @@ func ExampleSet_SymDiff() {
 	t := stringset.New("a", "c", "t")
 	fmt.Println(s.SymDiff(t))
 	// Output: {"b", "t"}
+}
+
+func ExampleContains_slice() {
+	s := strings.Fields("four fine fat fishes fly far")
+	fmt.Println(stringset.Contains(s, "fishes"))
+	// Output:
+	// true
+}
+
+func ExampleContains_map() {
+	s := map[string]int{"apples": 12, "pears": 2, "plums": 0, "cherries": 18}
+	fmt.Println(stringset.Contains(s, "pears"))
+	// Output:
+	// true
+}
+
+func ExampleContains_set() {
+	s := stringset.New("lead", "iron", "copper", "chromium")
+	fmt.Println(stringset.Contains(s, "chromium"))
+	// Output:
+	// true
 }
 
 func ExampleFromKeys() {
