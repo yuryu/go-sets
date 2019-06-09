@@ -1,6 +1,6 @@
 // Program makeset generates source code for a set package.  The type of the
-// elements of the set is determined by a TOML configuration stored either in a
-// file (named by the -config flag) or read from standard input.
+// elements of the set is determined by a TOML configuration stored in a file
+// named by the -config flag.
 //
 // Usage:
 //   go run makeset.go -output $DIR -config config.toml
@@ -87,7 +87,7 @@ func (c *Config) validate() error {
 }
 
 var (
-	configPath = flag.String("config", "", `Path of configuration file ("" to read stdin)`)
+	configPath = flag.String("config", "", "Path of configuration file (required)")
 	outDir     = flag.String("output", "", "Output directory path (required)")
 
 	mainT       = template.Must(template.New("main").Parse(strings.TrimSpace(mainFile)))
@@ -95,16 +95,10 @@ var (
 	baseImports = []string{"reflect", "sort", "strings"}
 )
 
-// readConfig loads a configuration from the specified path or stdin, and
-// reports whether it is valid.
+// readConfig loads a configuration from the specified path and reports whether
+// it is valid.
 func readConfig(path string) (*Config, error) {
-	var data []byte
-	var err error
-	if path == "" {
-		data, err = ioutil.ReadAll(os.Stdin)
-	} else {
-		data, err = ioutil.ReadFile(path)
-	}
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -149,8 +143,11 @@ func generate(t *template.Template, c *Config, path string) error {
 
 func main() {
 	flag.Parse()
-	if *outDir == "" {
+	switch {
+	case *outDir == "":
 		log.Fatal("You must specify a non-empty -output directory")
+	case *configPath == "":
+		log.Fatal("You must specify a non-empty -config path")
 	}
 	conf, err := readConfig(*configPath)
 	if err != nil {
