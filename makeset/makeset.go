@@ -7,7 +7,7 @@
 //
 package main
 
-//go:generate go run github.com/creachadair/staticfile/compiledata -pkg main -out static.go *.go.in
+//go:generate go run github.com/creachadair/staticfile/compiledata -out static.go *.go.in
 
 import (
 	"bytes"
@@ -114,11 +114,11 @@ func main() {
 		log.Fatalf("Unable to create output directory: %v", err)
 	}
 
-	mainT, err := template.New("main").Parse(string(staticfile.MustReadAll("core.go.in")))
+	mainT, err := template.New("main").Parse(string(staticfile.MustReadFile("core.go.in")))
 	if err != nil {
 		log.Fatalf("Invalid main source template: %v", err)
 	}
-	testT, err := template.New("test").Parse(string(staticfile.MustReadAll("core_test.go.in")))
+	testT, err := template.New("test").Parse(string(staticfile.MustReadFile("core_test.go.in")))
 	if err != nil {
 		log.Fatalf("Invalid test source template: %v", err)
 	}
