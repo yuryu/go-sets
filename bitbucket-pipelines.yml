@@ -24,3 +24,6 @@ pipelines:
     - step:
         image: golang:1.14
         <<: *Verify
+    - step:
+        image: golang:1.15
+        <<: *Verify
