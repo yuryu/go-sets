@@ -323,10 +323,7 @@ func FromKeys(v interface{}) Set {
 		}
 		return result
 	case Keyer:
-		for _, key := range t.Keys() {
-			result.Add(key)
-		}
-		return result
+		return New(t.Keys()...)
 	case nil:
 		return nil
 	}
