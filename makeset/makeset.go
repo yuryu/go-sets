@@ -15,7 +15,6 @@ import (
 	"flag"
 	"fmt"
 	"go/format"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -138,7 +137,7 @@ func main() {
 // readConfig loads a configuration from the specified path and reports whether
 // it is valid.
 func readConfig(path string) (*Config, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -178,5 +177,5 @@ func generate(t *template.Template, c *Config, path string) error {
 	if err != nil {
 		return fmt.Errorf("formatting source for %q: %v", path, err)
 	}
-	return ioutil.WriteFile(path, src, 0644)
+	return os.WriteFile(path, src, 0644)
 }
