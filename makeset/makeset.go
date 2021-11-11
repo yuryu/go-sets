@@ -7,8 +7,6 @@
 //
 package main
 
-//go:generate go run github.com/creachadair/staticfile/compiledata -out static.go *.go.in
-
 import (
 	"bytes"
 	"errors"
@@ -22,7 +20,8 @@ import (
 	"text/template"
 
 	"github.com/BurntSushi/toml"
-	"github.com/creachadair/staticfile"
+
+	_ "embed"
 )
 
 // A Config describes the nature of the set to be constructed.
@@ -92,6 +91,12 @@ var (
 	outDir     = flag.String("output", "", "Output directory path (required)")
 
 	baseImports = []string{"reflect", "sort", "strings"}
+
+	//go:embed core.go.in
+	mainSrc string
+
+	//go:embed core_test.go.in
+	testSrc string
 )
 
 func main() {
@@ -113,11 +118,11 @@ func main() {
 		log.Fatalf("Unable to create output directory: %v", err)
 	}
 
-	mainT, err := template.New("main").Parse(string(staticfile.MustReadFile("core.go.in")))
+	mainT, err := template.New("main").Parse(mainSrc)
 	if err != nil {
 		log.Fatalf("Invalid main source template: %v", err)
 	}
-	testT, err := template.New("test").Parse(string(staticfile.MustReadFile("core_test.go.in")))
+	testT, err := template.New("test").Parse(testSrc)
 	if err != nil {
 		log.Fatalf("Invalid test source template: %v", err)
 	}

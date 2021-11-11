@@ -1,4 +1,2 @@
 github.com/BurntSushi/toml v0.4.1 h1:GaI7EiDXDRfa8VshkTj7Fym7ha+y8/XxIgD2okUIjLw=
 github.com/BurntSushi/toml v0.4.1/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
-github.com/creachadair/staticfile v0.2.0 h1:hTjD7AD7Nu1ZmZ1D1oJITvi4hKAEoewsSyAievU9D60=
-github.com/creachadair/staticfile v0.2.0/go.mod h1:SezhfqKE9Q71Wq4wfYMwd4U8J7GrL1dKvg8tKsJaHtQ=
