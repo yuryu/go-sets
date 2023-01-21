@@ -1,8 +1,10 @@
-package stringset
+package stringset_test
 
 import (
 	"reflect"
 	"testing"
+
+	"bitbucket.org/creachadair/stringset"
 )
 
 // testValues contains an ordered sequence of ten set keys used for testing.
@@ -27,7 +29,9 @@ func testKeys(ixs ...int) (keys []string) {
 	return
 }
 
-func testSet(ixs ...int) Set { return New(testKeys(ixs...)...) }
+func testSet(ixs ...int) stringset.Set {
+	return stringset.New(testKeys(ixs...)...)
+}
 
 func keyPos(key string) int {
 	for i, v := range testValues {
@@ -39,12 +43,12 @@ func keyPos(key string) int {
 }
 
 func TestEmptiness(t *testing.T) {
-	var s Set
+	var s stringset.Set
 	if !s.Empty() {
 		t.Errorf("nil Set is not reported empty: %v", s)
 	}
 
-	s = New()
+	s = stringset.New()
 	if !s.Empty() {
 		t.Errorf("Empty Set is not reported empty: %v", s)
 	}
@@ -58,7 +62,7 @@ func TestEmptiness(t *testing.T) {
 }
 
 func TestClone(t *testing.T) {
-	a := New(testValues[:]...)
+	a := stringset.New(testValues[:]...)
 	b := testSet(1, 8, 5)
 	c := a.Clone()
 	c.Remove(b)
@@ -72,7 +76,7 @@ func TestClone(t *testing.T) {
 		t.Errorf("Unexpected inequality: %v != %v", a, c)
 	}
 
-	var s Set
+	var s stringset.Set
 	if got := s.Clone(); got != nil {
 		t.Errorf("Clone of nil set: got %v, want nil", got)
 	}
@@ -111,7 +115,7 @@ func TestMembership(t *testing.T) {
 	if got, ok := s.Choose(func(string) bool { return false }); ok {
 		t.Errorf(`Choose(impossible): got %v, want ""`, got)
 	}
-	if got, ok := New().Choose(nil); ok {
+	if got, ok := stringset.New().Choose(nil); ok {
 		t.Errorf(`Choose(nil): got %v, want ""`, got)
 	}
 
@@ -132,13 +136,13 @@ func TestMembership(t *testing.T) {
 		t.Errorf(`Pop(impossible): got %v, want ""`, got)
 	}
 	// Pop from an empty set returns not-found.
-	if got, ok := New().Pop(nil); ok {
+	if got, ok := stringset.New().Pop(nil); ok {
 		t.Errorf(`Pop(nil) on empty: got %v, want ""`, got)
 	}
 }
 
 func TestContainsAny(t *testing.T) {
-	set := New(testValues[2:]...)
+	set := stringset.New(testValues[2:]...)
 	tests := []struct {
 		keys []string
 		want bool
@@ -163,7 +167,7 @@ func TestContainsAny(t *testing.T) {
 
 func TestContainsAll(t *testing.T) {
 	//set := New("a", "e", "i", "y")
-	set := New(testValues[2:]...)
+	set := stringset.New(testValues[2:]...)
 	tests := []struct {
 		keys []string
 		want bool
@@ -185,12 +189,12 @@ func TestContainsAll(t *testing.T) {
 }
 
 func TestIsSubset(t *testing.T) {
-	var empty Set
+	var empty stringset.Set
 	key := testSet(0, 2, 6, 7, 9)
 	for _, test := range [][]string{
 		{}, testKeys(2, 6), testKeys(0, 7, 9),
 	} {
-		probe := New(test...)
+		probe := stringset.New(test...)
 		if !probe.IsSubset(key) {
 			t.Errorf("IsSubset %+v ⊂ %+v is false", probe, key)
 		}
@@ -202,9 +206,9 @@ func TestIsSubset(t *testing.T) {
 
 func TestNotSubset(t *testing.T) {
 	tests := []struct {
-		probe, key Set
+		probe, key stringset.Set
 	}{
-		{testSet(0), New()},
+		{testSet(0), stringset.New()},
 		{testSet(0), testSet(1)},
 		{testSet(0, 1), testSet(1)},
 		{testSet(0, 2, 1), testSet(0, 2, 3)},
@@ -217,10 +221,10 @@ func TestNotSubset(t *testing.T) {
 }
 
 func TestEquality(t *testing.T) {
-	nat := New(testValues[:]...)
+	nat := stringset.New(testValues[:]...)
 	odd := testSet(1, 3, 4, 5, 8)
 	tests := []struct {
-		left, right Set
+		left, right stringset.Set
 		eq          bool
 	}{
 		{nil, nil, true},
@@ -262,7 +266,7 @@ func TestUnion(t *testing.T) {
 	if got := vowels.Union(nil).Elements(); !reflect.DeepEqual(got, vkeys) {
 		t.Errorf("Vowels ∪ ø: got %+v, want %+v", got, vkeys)
 	}
-	if got := New().Union(vowels).Elements(); !reflect.DeepEqual(got, vkeys) {
+	if got := stringset.New().Union(vowels).Elements(); !reflect.DeepEqual(got, vkeys) {
 		t.Errorf("ø ∪ Vowels: got %+v, want %+v", got, vkeys)
 	}
 
@@ -272,13 +276,13 @@ func TestUnion(t *testing.T) {
 }
 
 func TestIntersect(t *testing.T) {
-	empty := New()
-	nat := New(testValues[:]...)
+	empty := stringset.New()
+	nat := stringset.New(testValues[:]...)
 	odd := testSet(1, 3, 5, 7, 9)
 	prime := testSet(2, 3, 5, 7)
 
 	tests := []struct {
-		left, right Set
+		left, right stringset.Set
 		want        []string
 	}{
 		{empty, empty, nil},
@@ -301,13 +305,13 @@ func TestIntersect(t *testing.T) {
 }
 
 func TestDiff(t *testing.T) {
-	empty := New()
-	nat := New(testValues[:]...)
+	empty := stringset.New()
+	nat := stringset.New(testValues[:]...)
 	odd := testSet(1, 3, 5, 7, 9)
 	prime := testSet(2, 3, 5, 7)
 
 	tests := []struct {
-		left, right Set
+		left, right stringset.Set
 		want        []string
 	}{
 		{empty, empty, nil},
@@ -331,10 +335,10 @@ func TestSymDiff(t *testing.T) {
 	a := testSet(0, 1, 2, 3, 4)
 	b := testSet(0, 4, 5, 6, 7)
 	c := testSet(3, 4, 8, 9)
-	empty := New()
+	empty := stringset.New()
 
 	tests := []struct {
-		left, right Set
+		left, right stringset.Set
 		want        []string
 	}{
 		{empty, empty, nil},
@@ -357,7 +361,7 @@ func TestSymDiff(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	tests := []struct {
-		before, update Set
+		before, update stringset.Set
 		want           []string
 		changed        bool
 	}{
@@ -379,7 +383,7 @@ func TestUpdate(t *testing.T) {
 
 func TestAdd(t *testing.T) {
 	tests := []struct {
-		before       Set
+		before       stringset.Set
 		update, want []string
 		changed      bool
 	}{
@@ -401,7 +405,7 @@ func TestAdd(t *testing.T) {
 
 func TestRemove(t *testing.T) {
 	tests := []struct {
-		before, update Set
+		before, update stringset.Set
 		want           []string
 		changed        bool
 	}{
@@ -424,7 +428,7 @@ func TestRemove(t *testing.T) {
 
 func TestDiscard(t *testing.T) {
 	tests := []struct {
-		before       Set
+		before       stringset.Set
 		update, want []string
 		changed      bool
 	}{
@@ -446,7 +450,7 @@ func TestDiscard(t *testing.T) {
 }
 
 func TestMap(t *testing.T) {
-	in := New(testValues[:]...)
+	in := stringset.New(testValues[:]...)
 	got := make([]string, len(testValues))
 	out := in.Map(func(s string) string {
 		if p := keyPos(s); p < 0 {
@@ -465,7 +469,7 @@ func TestMap(t *testing.T) {
 }
 
 func TestEach(t *testing.T) {
-	in := New(testValues[:]...)
+	in := stringset.New(testValues[:]...)
 	saw := make(map[string]int)
 	in.Each(func(name string) {
 		saw[name]++
@@ -483,7 +487,7 @@ func TestEach(t *testing.T) {
 }
 
 func TestSelection(t *testing.T) {
-	in := New(testValues[:]...)
+	in := stringset.New(testValues[:]...)
 	want := testSet(0, 2, 4, 6, 8)
 	if got := in.Select(func(s string) bool {
 		pos := keyPos(s)
@@ -491,8 +495,8 @@ func TestSelection(t *testing.T) {
 	}); !got.Equals(want) {
 		t.Errorf("%v.Select(evens): got %v, want %v", in, got, want)
 	}
-	if got := New().Select(func(string) bool { return true }); !got.Empty() {
-		t.Errorf("%v.Select(true): got %v, want empty", New(), got)
+	if got := stringset.New().Select(func(string) bool { return true }); !got.Empty() {
+		t.Errorf("%v.Select(true): got %v, want empty", stringset.New(), got)
 	}
 	if got := in.Select(func(string) bool { return false }); !got.Empty() {
 		t.Errorf("%v.Select(false): got %v, want empty", in, got)
@@ -500,9 +504,9 @@ func TestSelection(t *testing.T) {
 }
 
 func TestPartition(t *testing.T) {
-	in := New(testValues[:]...)
+	in := stringset.New(testValues[:]...)
 	tests := []struct {
-		in, left, right Set
+		in, left, right stringset.Set
 		f               func(string) bool
 		desc            string
 	}{
@@ -555,7 +559,7 @@ func TestIndex(t *testing.T) {
 		{testValues[4], testKeys(0, 2, 4, 9, 4), 2},
 	}
 	for _, test := range tests {
-		got := Index(test.needle, test.keys)
+		got := stringset.Index(test.needle, test.keys)
 		if got != test.want {
 			t.Errorf("Index(%+v, %+v): got %d, want %d", test.needle, test.keys, got, test.want)
 		}
@@ -585,8 +589,8 @@ func TestFromValues(t *testing.T) {
 		{map[*int]string{nil: testValues[0]}, testKeys(0)},
 	}
 	for _, test := range tests {
-		got := FromValues(test.input)
-		want := New(test.want...)
+		got := stringset.FromValues(test.input)
+		want := stringset.New(test.want...)
 		if !got.Equals(want) {
 			t.Errorf("MapValues %v: got %v, want %v", test.input, got, want)
 		}
@@ -596,7 +600,7 @@ func TestFromValues(t *testing.T) {
 func TestFromKeys(t *testing.T) {
 	tests := []struct {
 		input interface{}
-		want  Set
+		want  stringset.Set
 	}{
 		{3.5, nil},                  // unkeyable type
 		{map[uniq]uniq{1: 1}, nil},  // unkeyable type
@@ -611,7 +615,7 @@ func TestFromKeys(t *testing.T) {
 		{map[string]struct{}{testValues[2]: {}, testValues[7]: {}}, testSet(2, 7)},
 	}
 	for _, test := range tests {
-		got := FromKeys(test.input)
+		got := stringset.FromKeys(test.input)
 		if !got.Equals(test.want) {
 			t.Errorf("FromKeys %v: got %v, want %v", test.input, got, test.want)
 		}
@@ -637,10 +641,10 @@ func TestContainsFunc(t *testing.T) {
 		{map[string]float32{testValues[2]: 1, testValues[4]: 2}, testValues[2], true},
 		{map[string]float32{testValues[5]: 0, testValues[6]: 1, testValues[7]: 2, testValues[8]: 3}, testValues[2], false},
 
-		{Set(nil), testValues[3], false},
-		{New(), testValues[3], false},
-		{New(testValues[3]), testValues[3], true},
-		{New(testValues[5]), testValues[3], false},
+		{stringset.Set(nil), testValues[3], false},
+		{stringset.New(), testValues[3], false},
+		{stringset.New(testValues[3]), testValues[3], true},
+		{stringset.New(testValues[5]), testValues[3], false},
 		{testSet(0, 1), testValues[3], false},
 		{testSet(0, 3, 1), testValues[3], true},
 
@@ -652,7 +656,7 @@ func TestContainsFunc(t *testing.T) {
 		{keyer(testKeys(0, 6, 7)), testValues[9], false},
 	}
 	for _, test := range tests {
-		got := Contains(test.input, test.needle)
+		got := stringset.Contains(test.input, test.needle)
 		if got != test.want {
 			t.Errorf("Contains(%+v, %v): got %v, want %v", test.input, test.needle, got, test.want)
 		}
@@ -662,16 +666,16 @@ func TestContainsFunc(t *testing.T) {
 func TestFromIndexed(t *testing.T) {
 	tests := []struct {
 		input []int
-		want  Set
+		want  stringset.Set
 	}{
 		{nil, nil},
 		{[]int{}, nil},
 		{[]int{0}, testSet(0)},
 		{[]int{1, 8, 2, 9}, testSet(1, 2, 8, 9)},
-		{[]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, New(testValues[:]...)},
+		{[]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, stringset.New(testValues[:]...)},
 	}
 	for _, test := range tests {
-		got := FromIndexed(len(test.input), func(i int) string {
+		got := stringset.FromIndexed(len(test.input), func(i int) string {
 			return testValues[test.input[i]]
 		})
 		if !got.Equals(test.want) {
