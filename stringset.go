@@ -13,6 +13,7 @@
 package stringset
 
 import (
+	"maps"
 	"reflect"
 	"sort"
 	"strconv"
@@ -29,11 +30,24 @@ func (s Set) String() string {
 	if s.Empty() {
 		return "ø"
 	}
-	elts := make([]string, len(s))
-	for i, elt := range s.Elements() {
-		elts[i] = strconv.Quote(elt)
+	elts := s.Elements()
+	var out strings.Builder
+	out.WriteString("{")
+	out.WriteString(strconv.Quote(elts[0]))
+	for _, elt := range elts[1:] {
+		out.WriteString(", ")
+		out.WriteString(strconv.Quote(elt))
 	}
-	return "{" + strings.Join(elts, ", ") + "}"
+	out.WriteString("}")
+	return out.String()
+}
+
+// bigSmall returns the bigger set as the first return value and the smaller as the second.
+func bigSmall(s1, s2 Set) (Set, Set) {
+	if len(s1) < len(s2) {
+		return s2, s1
+	}
+	return s1, s2
 }
 
 // New returns a new set containing exactly the specified elements.
@@ -74,9 +88,7 @@ func (s Set) Unordered() []string {
 
 // Clone returns a new Set distinct from s, containing the same elements.
 func (s Set) Clone() Set {
-	var c Set
-	c.Update(s)
-	return c
+	return maps.Clone(s)
 }
 
 // ContainsAny reports whether s contains one or more of the given elements.
@@ -111,9 +123,7 @@ func (s Set) Contains(elts ...string) bool {
 
 // IsSubset reports whether s is a subset of s2, s ⊆ s2.
 func (s Set) IsSubset(s2 Set) bool {
-	if s.Empty() {
-		return true
-	} else if len(s) > len(s2) {
+	if len(s) > len(s2) {
 		return false
 	}
 	for k := range s {
@@ -133,12 +143,9 @@ func (s Set) Empty() bool { return len(s) == 0 }
 // Intersects reports whether the intersection s ∩ s2 is non-empty, without
 // explicitly constructing the intersection.
 func (s Set) Intersects(s2 Set) bool {
-	a, b := s, s2
-	if len(b) < len(a) {
-		a, b = b, a // Iterate over the smaller set
-	}
-	for k := range a {
-		if _, ok := b[k]; ok {
+	s2, s = bigSmall(s, s2) // Iterate over the smaller set.
+	for k := range s {
+		if _, ok := s2[k]; ok {
 			return true
 		}
 	}
@@ -152,10 +159,8 @@ func (s Set) Union(s2 Set) Set {
 	} else if s2.Empty() {
 		return s
 	}
-	set := make(Set)
-	for k := range s {
-		set[k] = struct{}{}
-	}
+	s, s2 = bigSmall(s, s2) // Clone the bigger set first.
+	set := s.Clone()
 	for k := range s2 {
 		set[k] = struct{}{}
 	}
@@ -167,6 +172,7 @@ func (s Set) Intersect(s2 Set) Set {
 	if s.Empty() || s2.Empty() {
 		return nil
 	}
+	s2, s = bigSmall(s, s2) // Iterate over the smaller set.
 	set := make(Set)
 	for k := range s {
 		if _, ok := s2[k]; ok {
@@ -208,21 +214,21 @@ func (s Set) SymDiff(s2 Set) Set {
 func (s *Set) Update(s2 Set) bool {
 	in := len(*s)
 	if *s == nil && len(s2) > 0 {
-		*s = make(Set)
+		*s = s2.Clone()
+		return true
 	}
-	for k := range s2 {
-		(*s)[k] = struct{}{}
-	}
+	maps.Copy(*s, s2)
 	return len(*s) != in
 }
 
 // Add adds the specified elements to *s in-place and reports whether anything
 // was added.  If *s == nil, a new set equivalent to New(ss...) is stored in *s.
 func (s *Set) Add(ss ...string) bool {
-	in := len(*s)
 	if *s == nil {
-		*s = make(Set)
+		*s = New(ss...)
+		return !s.Empty()
 	}
+	in := len(*s)
 	for _, key := range ss {
 		(*s)[key] = struct{}{}
 	}
@@ -235,10 +241,11 @@ func (s *Set) Add(ss ...string) bool {
 // Equivalent to s = s.Diff(s2), but does not allocate a new set.
 func (s Set) Remove(s2 Set) bool {
 	in := s.Len()
-	if !s.Empty() {
-		for k := range s2 {
-			delete(s, k)
+	for k := range s2 {
+		if s.Empty() {
+			break
 		}
+		delete(s, k)
 	}
 	return s.Len() != in
 }
@@ -250,10 +257,11 @@ func (s Set) Remove(s2 Set) bool {
 // set for ss.
 func (s Set) Discard(elts ...string) bool {
 	in := s.Len()
-	if !s.Empty() {
-		for _, elt := range elts {
-			delete(s, elt)
+	for _, elt := range elts {
+		if s.Empty() {
+			break
 		}
+		delete(s, elt)
 	}
 	return s.Len() != in
 }
@@ -299,18 +307,15 @@ var refType = reflect.TypeOf((*string)(nil)).Elem()
 // a []string, a map[string]T, or a Keyer. It returns nil if v's type does
 // not have one of these forms.
 func FromKeys(v interface{}) Set {
-	var result Set
 	switch t := v.(type) {
 	case string:
 		return New(t)
 	case []string:
-		for _, key := range t {
-			result.Add(key)
-		}
-		return result
+		return New(t...)
 	case map[string]struct{}: // includes Set
+		result := make(Set, len(t))
 		for key := range t {
-			result.Add(key)
+			result[key] = struct{}{}
 		}
 		return result
 	case Keyer:
@@ -322,8 +327,10 @@ func FromKeys(v interface{}) Set {
 	if m.Kind() != reflect.Map || m.Type().Key() != refType {
 		return nil
 	}
-	for _, key := range m.MapKeys() {
-		result.Add(key.Interface().(string))
+	result := make(Set, m.Len())
+	iter := m.MapRange()
+	for iter.Next() {
+		result.Add(iter.Key().String())
 	}
 	return result
 }
@@ -346,8 +353,9 @@ func FromValues(v interface{}) Set {
 	}
 	var set Set
 	m := reflect.ValueOf(v)
-	for _, key := range m.MapKeys() {
-		set.Add(m.MapIndex(key).Interface().(string))
+	iter := m.MapRange()
+	for iter.Next() {
+		set.Add(iter.Value().String())
 	}
 	return set
 }
